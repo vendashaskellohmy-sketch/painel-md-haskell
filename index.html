@@ -201,9 +201,7 @@ const msSel = { marca: new Set(), linha: new Set(), tipo: new Set() };
 
 /* CSV */
 function parseCSV(t) {
-  const rows = t.trim().split(/
-?
-/);
+  const rows = t.trim().replace(/\r/g,'').split('\n');
   const cab = csvSplit(rows[0]);
   return rows.slice(1).map(r => {
     const v = csvSplit(r), o = {};
