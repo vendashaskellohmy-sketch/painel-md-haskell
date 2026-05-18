@@ -7,292 +7,120 @@
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
-    --verde:       #2d6a4f;
-    --verde-escuro:#1b4332;
-    --verde-claro: #d8f3dc;
-    --verde-mid:   #52b788;
-    --branco:      #ffffff;
-    --cinza-bg:    #f8f9fa;
-    --cinza-borda: #dee2e6;
-    --cinza-texto: #6c757d;
-    --texto:       #212529;
-    --fonte: 'Segoe UI', system-ui, sans-serif;
+    --verde:#2d6a4f; --verde-escuro:#1b4332; --verde-claro:#d8f3dc;
+    --verde-mid:#52b788; --branco:#ffffff; --cinza-bg:#f8f9fa;
+    --cinza-borda:#dee2e6; --cinza-texto:#6c757d; --texto:#212529;
+    --fonte:'Segoe UI',system-ui,sans-serif;
   }
-  body { font-family: var(--fonte); background: var(--cinza-bg); color: var(--texto); min-height: 100vh; }
+  body { font-family:var(--fonte); background:var(--cinza-bg); color:var(--texto); min-height:100vh; }
 
-  .header {
-    background: var(--verde-escuro);
-    padding: 0 2rem;
-    height: 68px;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    box-shadow: 0 2px 8px rgba(0,0,0,.18);
-  }
-  .header-logo { height: 48px; width: 48px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
-  .header-titles { flex: 1; }
-  .header-titles h1 { font-size: 16px; font-weight: 600; color: var(--branco); letter-spacing: .3px; }
-  .header-titles p  { font-size: 12px; color: rgba(255,255,255,.65); margin-top: 2px; }
-  .header-btns { display: flex; gap: 8px; }
-  .btn {
-    color: var(--branco);
-    border: none;
-    border-radius: 6px;
-    padding: 7px 16px;
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    white-space: nowrap;
-  }
-  .btn-atualizar { background: var(--verde-mid); }
-  .btn-atualizar:hover { background: #40916c; }
-  .btn-pdf { background: #495057; }
-  .btn-pdf:hover { background: #343a40; }
+  /* HEADER */
+  .header { background:var(--verde-escuro); padding:0 2rem; height:68px; display:flex; align-items:center; gap:1rem; position:sticky; top:0; z-index:100; box-shadow:0 2px 8px rgba(0,0,0,.18); }
+  .header-logo { height:48px; width:48px; border-radius:50%; object-fit:cover; flex-shrink:0; }
+  .header-titles { flex:1; }
+  .header-titles h1 { font-size:16px; font-weight:600; color:var(--branco); letter-spacing:.3px; }
+  .header-titles p  { font-size:12px; color:rgba(255,255,255,.65); margin-top:2px; }
+  .header-btns { display:flex; gap:8px; }
+  .btn { color:var(--branco); border:none; border-radius:6px; padding:7px 16px; font-size:13px; font-weight:500; cursor:pointer; white-space:nowrap; }
+  .btn-atualizar { background:var(--verde-mid); }
+  .btn-atualizar:hover { background:#40916c; }
+  .btn-pdf { background:#495057; }
+  .btn-pdf:hover { background:#343a40; }
 
-  .container { max-width: 1400px; margin: 0 auto; padding: 1.5rem 1.5rem 3rem; }
+  /* CONTAINER */
+  .container { max-width:1400px; margin:0 auto; padding:1.5rem 1.5rem 3rem; }
 
-  .kpis { display: grid; grid-template-columns: repeat(7, 1fr); gap: 12px; margin-bottom: 1.25rem; }
-  @media (max-width: 1200px) { .kpis { grid-template-columns: repeat(4, 1fr); } }
-  @media (max-width: 700px)  { .kpis { grid-template-columns: repeat(2, 1fr); } }
-  .kpi {
-    background: var(--branco);
-    border-radius: 10px;
-    padding: 14px 16px;
-    border: 1px solid var(--cinza-borda);
-    border-left: 4px solid var(--verde-mid);
-  }
-  .kpi-label { font-size: 11px; text-transform: uppercase; letter-spacing: .6px; color: var(--cinza-texto); margin-bottom: 6px; }
-  .kpi-value { font-size: 22px; font-weight: 700; color: var(--verde-escuro); line-height: 1; }
-  .kpi-sub   { font-size: 11px; color: var(--cinza-texto); margin-top: 4px; }
+  /* KPIS */
+  .kpis { display:grid; grid-template-columns:repeat(7,1fr); gap:12px; margin-bottom:1.25rem; }
+  @media(max-width:1200px){ .kpis{ grid-template-columns:repeat(4,1fr); } }
+  @media(max-width:700px) { .kpis{ grid-template-columns:repeat(2,1fr); } }
+  .kpi { background:var(--branco); border-radius:10px; padding:14px 16px; border:1px solid var(--cinza-borda); border-left:4px solid var(--verde-mid); }
+  .kpi-label { font-size:11px; text-transform:uppercase; letter-spacing:.6px; color:var(--cinza-texto); margin-bottom:6px; }
+  .kpi-value { font-size:22px; font-weight:700; color:var(--verde-escuro); line-height:1; }
+  .kpi-sub   { font-size:11px; color:var(--cinza-texto); margin-top:4px; }
 
-  .filtros-card {
-    background: var(--branco);
-    border: 1px solid var(--cinza-borda);
-    border-radius: 10px;
-    padding: 14px 16px;
-    margin-bottom: 1.25rem;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    align-items: flex-end;
-  }
-  .filtros-card label { font-size: 12px; color: var(--cinza-texto); display: flex; flex-direction: column; gap: 4px; font-weight: 500; }
-  .filtros-card input {
-    font-size: 13px;
-    padding: 6px 10px;
-    border: 1px solid var(--cinza-borda);
-    border-radius: 6px;
-    color: var(--texto);
-    background: var(--branco);
-    height: 34px;
-    min-width: 220px;
-  }
-  .filtros-card input:focus { outline: none; border-color: var(--verde); }
+  /* FILTROS */
+  .filtros-card { background:var(--branco); border:1px solid var(--cinza-borda); border-radius:10px; padding:14px 16px; margin-bottom:1.25rem; display:flex; flex-wrap:wrap; gap:10px; align-items:flex-end; }
+  .filtros-card label { font-size:12px; color:var(--cinza-texto); display:flex; flex-direction:column; gap:4px; font-weight:500; }
+  .filtros-card input { font-size:13px; padding:6px 10px; border:1px solid var(--cinza-borda); border-radius:6px; color:var(--texto); background:var(--branco); height:34px; min-width:220px; }
+  .filtros-card input:focus { outline:none; border-color:var(--verde); }
 
-  /* Multi-select customizado */
-  .multi-select-wrap { position: relative; }
-  .multi-select-btn {
-    font-size: 13px;
-    padding: 6px 10px;
-    border: 1px solid var(--cinza-borda);
-    border-radius: 6px;
-    color: var(--texto);
-    background: var(--branco);
-    height: 34px;
-    min-width: 150px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 6px;
-    user-select: none;
+  /* MULTI-SELECT */
+  .ms-wrap { position:relative; }
+  .ms-btn {
+    font-size:13px; padding:6px 10px; border:1px solid var(--cinza-borda);
+    border-radius:6px; color:var(--texto); background:var(--branco);
+    height:34px; min-width:160px; cursor:pointer;
+    display:flex; align-items:center; justify-content:space-between; gap:6px;
+    user-select:none;
   }
-  .multi-select-btn:hover { border-color: var(--verde); }
-  .multi-select-btn.open { border-color: var(--verde); }
-  .multi-select-dropdown {
-    display: none;
-    position: absolute;
-    top: calc(100% + 4px);
-    left: 0;
-    min-width: 100%;
-    background: var(--branco);
-    border: 1px solid var(--cinza-borda);
-    border-radius: 6px;
-    box-shadow: 0 4px 12px rgba(0,0,0,.1);
-    z-index: 200;
-    max-height: 220px;
-    overflow-y: auto;
+  .ms-btn:hover, .ms-btn.aberto { border-color:var(--verde); }
+  .ms-drop {
+    display:none; position:absolute; top:calc(100% + 4px); left:0;
+    min-width:100%; background:var(--branco); border:1px solid var(--cinza-borda);
+    border-radius:6px; box-shadow:0 4px 12px rgba(0,0,0,.12);
+    z-index:500; max-height:220px; overflow-y:auto;
   }
-  .multi-select-dropdown.open { display: block; }
-  .multi-select-option {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 7px 12px;
-    font-size: 13px;
-    cursor: pointer;
-  }
-  .multi-select-option:hover { background: var(--verde-claro); }
-  .multi-select-option input[type=checkbox] { accent-color: var(--verde); width: 14px; height: 14px; cursor: pointer; }
-  .multi-select-sep { height: 1px; background: var(--cinza-borda); margin: 2px 0; }
-  .multi-select-arrow { font-size: 10px; color: var(--cinza-texto); }
+  .ms-drop.aberto { display:block; }
+  .ms-item { display:flex; align-items:center; gap:8px; padding:7px 12px; font-size:13px; cursor:pointer; }
+  .ms-item:hover { background:var(--verde-claro); }
+  .ms-item input[type=checkbox] { accent-color:var(--verde); width:14px; height:14px; flex-shrink:0; pointer-events:none; }
+  .ms-sep { height:1px; background:var(--cinza-borda); }
+  .ms-arrow { font-size:10px; color:var(--cinza-texto); pointer-events:none; }
 
-  .tabela-card {
-    background: var(--branco);
-    border: 1px solid var(--cinza-borda);
-    border-radius: 10px;
-    overflow: hidden;
-  }
-  .tabela-header {
-    padding: 14px 16px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border-bottom: 1px solid var(--cinza-borda);
-  }
-  .tabela-header span { font-size: 14px; font-weight: 600; color: var(--texto); }
-  .tabela-count {
-    font-size: 12px;
-    background: var(--verde-claro);
-    color: var(--verde-escuro);
-    padding: 3px 10px;
-    border-radius: 20px;
-    font-weight: 500;
-  }
-  .tabela-scroll { overflow-x: auto; }
+  /* TABELA */
+  .tabela-card { background:var(--branco); border:1px solid var(--cinza-borda); border-radius:10px; overflow:hidden; }
+  .tabela-header { padding:14px 16px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--cinza-borda); }
+  .tabela-header span { font-size:14px; font-weight:600; color:var(--texto); }
+  .tabela-count { font-size:12px; background:var(--verde-claro); color:var(--verde-escuro); padding:3px 10px; border-radius:20px; font-weight:500; }
+  .tabela-scroll { overflow-x:auto; }
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  thead tr { background:var(--cinza-bg); }
+  th { padding:10px 12px; text-align:left; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.5px; color:var(--cinza-texto); border-bottom:1px solid var(--cinza-borda); white-space:nowrap; cursor:pointer; user-select:none; }
+  th:hover { color:var(--verde); }
+  th.sort-asc::after  { content:' ▲'; font-size:9px; }
+  th.sort-desc::after { content:' ▼'; font-size:9px; }
+  td { padding:9px 12px; border-bottom:1px solid var(--cinza-borda); vertical-align:middle; }
+  tr:last-child td { border-bottom:none; }
+  tr:hover td { background:#f0faf4; }
+  .prod-img { width:40px; height:40px; border-radius:6px; object-fit:cover; display:block; cursor:zoom-in; }
+  .img-ph { width:40px; height:40px; border-radius:6px; background:var(--verde-claro); display:flex; align-items:center; justify-content:center; font-size:18px; }
+  .cod { font-family:'Courier New',monospace; font-size:12px; color:var(--cinza-texto); }
 
-  table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  thead tr { background: var(--cinza-bg); }
-  th {
-    padding: 10px 12px;
-    text-align: left;
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: .5px;
-    color: var(--cinza-texto);
-    border-bottom: 1px solid var(--cinza-borda);
-    white-space: nowrap;
-    cursor: pointer;
-    user-select: none;
-  }
-  th:hover { color: var(--verde); }
-  th.sort-asc::after  { content: ' ▲'; font-size: 9px; }
-  th.sort-desc::after { content: ' ▼'; font-size: 9px; }
-  td {
-    padding: 9px 12px;
-    border-bottom: 1px solid var(--cinza-borda);
-    vertical-align: middle;
-    color: var(--texto);
-  }
-  tr:last-child td { border-bottom: none; }
-  tr:hover td { background: #f0faf4; }
+  /* PAGINAÇÃO */
+  .paginacao { display:flex; align-items:center; justify-content:space-between; padding:12px 16px; border-top:1px solid var(--cinza-borda); flex-wrap:wrap; gap:8px; }
+  .paginacao-info { color:var(--cinza-texto); font-size:12px; }
+  .paginacao-btns { display:flex; gap:4px; flex-wrap:wrap; }
+  .paginacao-btns button { padding:5px 11px; border:1px solid var(--cinza-borda); border-radius:6px; background:var(--branco); cursor:pointer; font-size:13px; color:var(--texto); min-width:34px; }
+  .paginacao-btns button:hover:not(:disabled) { background:var(--verde-claro); border-color:var(--verde-mid); color:var(--verde-escuro); }
+  .paginacao-btns button.ativo { background:var(--verde); color:var(--branco); border-color:var(--verde); font-weight:600; }
+  .paginacao-btns button:disabled { opacity:.4; cursor:default; }
 
-  .prod-img {
-    width: 40px; height: 40px;
-    border-radius: 6px;
-    object-fit: cover;
-    display: block;
-    background: var(--cinza-bg);
-  }
-  .img-placeholder {
-    width: 40px; height: 40px;
-    border-radius: 6px;
-    background: var(--verde-claro);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 18px;
-  }
-  .cod { font-family: 'Courier New', monospace; font-size: 12px; color: var(--cinza-texto); }
+  /* LIGHTBOX */
+  .lb { display:none; position:fixed; inset:0; background:rgba(0,0,0,.82); z-index:9999; align-items:center; justify-content:center; cursor:zoom-out; }
+  .lb.aberto { display:flex; }
+  .lb img { max-width:90vw; max-height:88vh; border-radius:10px; box-shadow:0 8px 40px rgba(0,0,0,.5); object-fit:contain; cursor:default; }
+  .lb-fechar { position:fixed; top:16px; right:22px; background:rgba(0,0,0,.45); border:none; color:#fff; font-size:22px; width:36px; height:36px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+  .lb-fechar:hover { background:rgba(0,0,0,.7); }
 
-  .paginacao {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px 16px;
-    border-top: 1px solid var(--cinza-borda);
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-  .paginacao-info { color: var(--cinza-texto); font-size: 12px; }
-  .paginacao-btns { display: flex; gap: 4px; flex-wrap: wrap; }
-  .paginacao-btns button {
-    padding: 5px 11px;
-    border: 1px solid var(--cinza-borda);
-    border-radius: 6px;
-    background: var(--branco);
-    cursor: pointer;
-    font-size: 13px;
-    color: var(--texto);
-    min-width: 34px;
-  }
-  .paginacao-btns button:hover:not(:disabled) { background: var(--verde-claro); border-color: var(--verde-mid); color: var(--verde-escuro); }
-  .paginacao-btns button.ativo { background: var(--verde); color: var(--branco); border-color: var(--verde); font-weight: 600; }
-  .paginacao-btns button:disabled { opacity: .4; cursor: default; }
+  /* ESTADOS */
+  .estado { text-align:center; padding:3rem 1rem; color:var(--cinza-texto); font-size:14px; }
+  .estado.erro { color:#c0392b; }
 
-  .estado { text-align: center; padding: 3rem 1rem; color: var(--cinza-texto); font-size: 14px; }
-  .estado.erro { color: #c0392b; }
-
-
-  /* ── LIGHTBOX ── */
-  .lightbox-overlay {{
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,.82);
-    z-index: 9999;
-    align-items: center;
-    justify-content: center;
-    cursor: zoom-out;
-  }}
-  .lightbox-overlay.open {{
-    display: flex;
-  }}
-  .lightbox-img {{
-    max-width: 90vw;
-    max-height: 88vh;
-    border-radius: 10px;
-    box-shadow: 0 8px 40px rgba(0,0,0,.5);
-    object-fit: contain;
-    cursor: default;
-  }}
-  .lightbox-close {{
-    position: fixed;
-    top: 18px;
-    right: 24px;
-    color: #fff;
-    font-size: 32px;
-    cursor: pointer;
-    line-height: 1;
-    opacity: .8;
-    background: none;
-    border: none;
-    font-weight: 300;
-  }}
-  .lightbox-close:hover {{ opacity: 1; }}
-  .prod-img {{ cursor: zoom-in; }}
-
-  /* ── PRINT / PDF ── */
+  /* PRINT */
   @media print {
-    @page { size: A4 landscape; margin: 12mm; }
-    body { background: white; font-size: 11px; }
-    .header { position: static; box-shadow: none; margin-bottom: 12px; background: #1b4332 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    .container { padding: 0; max-width: 100%; }
-    .kpis { grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 10px; }
-    .kpi { padding: 8px 10px; border-left: 3px solid #52b788 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    .kpi-value { font-size: 16px; }
-    .filtros-card, .paginacao, .btn-atualizar, .btn-pdf { display: none !important; }
-    .tabela-card { border-radius: 0; border: none; }
-    .tabela-header { padding: 8px 0; }
-    table { font-size: 11px; }
-    th, td { padding: 6px 8px; }
-    tr { page-break-inside: avoid; }
-    .prod-img { width: 32px; height: 32px; }
-    .img-placeholder { width: 32px; height: 32px; font-size: 14px; }
-    /* Mostrar TODOS os itens no PDF, ignorar paginação */
-    #tabela-container table tbody { display: table-row-group !important; }
+    @page { size:A4 landscape; margin:12mm; }
+    body { background:white; }
+    .header { position:static; box-shadow:none; background:#1b4332 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    .container { padding:0; max-width:100%; }
+    .kpis { grid-template-columns:repeat(7,1fr) !important; gap:6px; margin-bottom:10px; }
+    .kpi { padding:8px 10px; border-left:3px solid #52b788 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    .kpi-value { font-size:16px; }
+    .filtros-card, .paginacao, .btn-atualizar, .btn-pdf, .lb { display:none !important; }
+    .tabela-card { border-radius:0; border:none; }
+    th, td { padding:6px 8px; }
+    tr { page-break-inside:avoid; }
+    .prod-img { width:32px; height:32px; }
   }
 </style>
 </head>
@@ -305,19 +133,18 @@
     <p id="update-time">Carregando dados...</p>
   </div>
   <div class="header-btns">
-    <button class="btn btn-pdf" onclick="gerarPDF()">⬇ PDF</button>
-    <button class="btn btn-atualizar" onclick="carregarDados()">↻ Atualizar</button>
+    <button class="btn btn-pdf" onclick="gerarPDF()">&#x2935; PDF</button>
+    <button class="btn btn-atualizar" onclick="carregarDados()">&#x21BB; Atualizar</button>
   </div>
 </header>
 
-
-<div class="lightbox-overlay" id="lightbox" onclick="fecharLightbox()">
-  <button class="lightbox-close" onclick="fecharLightbox()">&#x2715;</button>
-  <img class="lightbox-img" id="lightbox-img" src="" alt="" onclick="event.stopPropagation()">
+<!-- LIGHTBOX -->
+<div class="lb" id="lb" onclick="lbFechar()">
+  <button class="lb-fechar" onclick="lbFechar()">&#x2715;</button>
+  <img id="lb-img" src="" alt="" onclick="event.stopPropagation()">
 </div>
 
 <main class="container">
-
   <div class="kpis">
     <div class="kpi"><div class="kpi-label">Total SKUs</div><div class="kpi-value" id="k-total">—</div><div class="kpi-sub">cadastrados</div></div>
     <div class="kpi"><div class="kpi-label">SKUs em Estoque</div><div class="kpi-value" id="k-em-estoque">—</div><div class="kpi-sub">disp. &gt; 0</div></div>
@@ -329,29 +156,23 @@
   </div>
 
   <div class="filtros-card">
-    <label>Buscar<input type="text" id="f-busca" placeholder="Código ou descrição..." oninput="filtrarEPaginar()"></label>
+    <label>Buscar<input type="text" id="f-busca" placeholder="Código ou descrição..." oninput="aplicarFiltros()"></label>
     <label>Marca
-      <div class="multi-select-wrap" id="wrap-marca">
-        <div class="multi-select-btn" id="btn-marca" onclick="toggleDropdown('marca')">
-          <span id="label-marca">Todas</span><span class="multi-select-arrow">▾</span>
-        </div>
-        <div class="multi-select-dropdown" id="drop-marca"></div>
+      <div class="ms-wrap">
+        <div class="ms-btn" id="ms-btn-marca" onclick="msToggle(event,'marca')"><span id="ms-lbl-marca">Todas</span><span class="ms-arrow">&#9662;</span></div>
+        <div class="ms-drop" id="ms-drop-marca"></div>
       </div>
     </label>
     <label>Linha
-      <div class="multi-select-wrap" id="wrap-linha">
-        <div class="multi-select-btn" id="btn-linha" onclick="toggleDropdown('linha')">
-          <span id="label-linha">Todas</span><span class="multi-select-arrow">▾</span>
-        </div>
-        <div class="multi-select-dropdown" id="drop-linha"></div>
+      <div class="ms-wrap">
+        <div class="ms-btn" id="ms-btn-linha" onclick="msToggle(event,'linha')"><span id="ms-lbl-linha">Todas</span><span class="ms-arrow">&#9662;</span></div>
+        <div class="ms-drop" id="ms-drop-linha"></div>
       </div>
     </label>
     <label>Tipo
-      <div class="multi-select-wrap" id="wrap-tipo">
-        <div class="multi-select-btn" id="btn-tipo" onclick="toggleDropdown('tipo')">
-          <span id="label-tipo">Todos</span><span class="multi-select-arrow">▾</span>
-        </div>
-        <div class="multi-select-dropdown" id="drop-tipo"></div>
+      <div class="ms-wrap">
+        <div class="ms-btn" id="ms-btn-tipo" onclick="msToggle(event,'tipo')"><span id="ms-lbl-tipo">Todos</span><span class="ms-arrow">&#9662;</span></div>
+        <div class="ms-drop" id="ms-drop-tipo"></div>
       </div>
     </label>
   </div>
@@ -369,298 +190,229 @@
       <div class="paginacao-btns" id="pag-btns"></div>
     </div>
   </div>
-
 </main>
 
 <script>
 const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQnGmWU2dTsga5PBN2RIEEJAF6sirZYwU_h7RVY7V2QEWxSY49yHhMQSbx1BqM_YkYuNlREwcp4ybLS/pub?output=csv';
 const POR_PAGINA = 50;
+let dadosOriginais = [], dadosFiltrados = [];
+let paginaAtual = 1, sortCol = 'Descrição', sortDir = 'asc';
+const msSel = { marca: new Set(), linha: new Set(), tipo: new Set() };
 
-let dadosOriginais = [];
-let dadosFiltrados = [];
-let paginaAtual = 1;
-let sortCol = 'Descri\u00e7\u00e3o';
-let sortDir = 'asc';
-
-// Multi-select state
-const multiState = { marca: new Set(), linha: new Set(), tipo: new Set() };
-
-/* ── PARSE CSV ── */
-function parseCSV(text) {
-  const linhas = text.trim().split(/\r?\n/);
-  const cab = splitLinha(linhas[0]);
-  return linhas.slice(1).map(l => {
-    const vals = splitLinha(l);
-    const obj = {};
-    cab.forEach((h, i) => obj[h.trim()] = (vals[i] || '').trim());
-    return obj;
-  }).filter(r => r['C\u00f3digo'] && r['C\u00f3digo'] !== '');
+/* CSV */
+function parseCSV(t) {
+  const rows = t.trim().split(/
+?
+/);
+  const cab = csvSplit(rows[0]);
+  return rows.slice(1).map(r => {
+    const v = csvSplit(r), o = {};
+    cab.forEach((h,i) => o[h.trim()] = (v[i]||'').trim());
+    return o;
+  }).filter(r => r['Código'] && r['Código'] !== '');
 }
-
-function splitLinha(linha) {
-  const out = []; let cel = '', dentro = false;
-  for (let i = 0; i < linha.length; i++) {
-    const c = linha[i];
-    if (c === '"') { dentro = !dentro; }
-    else if (c === ',' && !dentro) { out.push(cel); cel = ''; }
-    else { cel += c; }
+function csvSplit(s) {
+  const a=[]; let c='',q=false;
+  for(let i=0;i<s.length;i++){
+    if(s[i]==='"')q=!q;
+    else if(s[i]===','&&!q){a.push(c);c='';}
+    else c+=s[i];
   }
-  out.push(cel);
-  return out;
+  a.push(c); return a;
 }
+function n(v){ return parseFloat((v||'0').toString().replace(',','.'))||0; }
 
-function num(v) { return parseFloat((v || '0').toString().replace(',', '.')) || 0; }
-
-/* ── MULTI-SELECT ── */
-function toggleDropdown(campo) {
+/* MULTI-SELECT */
+function msToggle(e, campo) {
+  e.stopPropagation();
+  const aberto = document.getElementById('ms-drop-'+campo).classList.contains('aberto');
+  msFechaAll();
+  if(!aberto) {
+    document.getElementById('ms-drop-'+campo).classList.add('aberto');
+    document.getElementById('ms-btn-'+campo).classList.add('aberto');
+  }
+}
+function msFechaAll() {
   ['marca','linha','tipo'].forEach(c => {
-    if (c !== campo) {
-      document.getElementById('drop-' + c).classList.remove('open');
-      document.getElementById('btn-' + c).classList.remove('open');
-    }
+    document.getElementById('ms-drop-'+c).classList.remove('aberto');
+    document.getElementById('ms-btn-'+c).classList.remove('aberto');
   });
-  const drop = document.getElementById('drop-' + campo);
-  const btn  = document.getElementById('btn-' + campo);
-  drop.classList.toggle('open');
-  btn.classList.toggle('open');
 }
+document.addEventListener('click', msFechaAll);
 
-document.addEventListener('click', e => {
-  ['marca','linha','tipo'].forEach(campo => {
-    const wrap = document.getElementById('wrap-' + campo);
-    if (wrap && !wrap.contains(e.target)) {
-      document.getElementById('drop-' + campo).classList.remove('open');
-      document.getElementById('btn-' + campo).classList.remove('open');
-    }
+function msPopular(campo, dados) {
+  const key = campo.charAt(0).toUpperCase()+campo.slice(1);
+  const opts = [...new Set(dados.map(r=>r[key]).filter(Boolean))].sort();
+  const drop = document.getElementById('ms-drop-'+campo);
+  const sel  = msSel[campo];
+  const todosCheck = sel.size===0 ? 'checked' : '';
+  let html = `<div class="ms-item" data-campo="${campo}" data-val="__todos__"><input type="checkbox" ${todosCheck}> Todos</div><div class="ms-sep"></div>`;
+  opts.forEach(o => {
+    const chk = sel.has(o) ? 'checked' : '';
+    html += `<div class="ms-item" data-campo="${campo}" data-val="${o.replace(/"/g,'&quot;')}"><input type="checkbox" ${chk}> ${o}</div>`;
   });
-});
-
-function popularMultiSelect(campo, dados) {
-  const key  = campo.charAt(0).toUpperCase() + campo.slice(1);
-  const opts = [...new Set(dados.map(r => r[key]).filter(Boolean))].sort();
-  const drop = document.getElementById('drop-' + campo);
-  const cur  = multiState[campo];
-
-  drop.innerHTML =
-    `<div class="multi-select-option" onclick="toggleTodos('${campo}')">
-       <input type="checkbox" id="chk-${campo}-todos" ${cur.size === 0 ? 'checked' : ''}> Todos
-     </div>
-     <div class="multi-select-sep"></div>` +
-    opts.map(o =>
-      `<div class="multi-select-option" onclick="toggleOpcao('${campo}','${o.replace(/'/g,"\\'")}',${JSON.stringify(o)})">
-         <input type="checkbox" id="chk-${campo}-${o}" ${cur.has(o) ? 'checked' : ''}> ${o}
-       </div>`
-    ).join('');
-
-  atualizarLabel(campo);
+  drop.innerHTML = html;
+  drop.querySelectorAll('.ms-item').forEach(el => {
+    el.addEventListener('click', e => {
+      e.stopPropagation();
+      const val = el.dataset.val;
+      const c   = el.dataset.campo;
+      if(val==='__todos__') { msSel[c].clear(); }
+      else { if(msSel[c].has(val)) msSel[c].delete(val); else msSel[c].add(val); }
+      msPopular(c, dadosOriginais);
+      msLabel(c);
+      aplicarFiltros();
+    });
+  });
+  msLabel(campo);
+}
+function msLabel(campo) {
+  const s = msSel[campo];
+  const el = document.getElementById('ms-lbl-'+campo);
+  if(s.size===0) el.textContent = campo==='tipo'?'Todos':'Todas';
+  else if(s.size===1) el.textContent = [...s][0];
+  else el.textContent = s.size+' selecionados';
 }
 
-function toggleTodos(campo) {
-  multiState[campo].clear();
-  popularMultiSelect(campo, dadosOriginais);
-  filtrarEPaginar();
-}
-
-function toggleOpcao(campo, valor, valorReal) {
-  const s = multiState[campo];
-  if (s.has(valorReal)) s.delete(valorReal); else s.add(valorReal);
-  popularMultiSelect(campo, dadosOriginais);
-  filtrarEPaginar();
-}
-
-function atualizarLabel(campo) {
-  const s = multiState[campo];
-  const label = document.getElementById('label-' + campo);
-  if (s.size === 0) {
-    label.textContent = campo === 'tipo' ? 'Todos' : 'Todas';
-  } else if (s.size === 1) {
-    label.textContent = [...s][0];
-  } else {
-    label.textContent = s.size + ' selecionados';
-  }
-}
-
-/* ── KPIs ── */
+/* KPIs */
 function renderKPIs(dados) {
-  const emEstoque  = dados.filter(r => num(r['Estoque Dispon\u00edvel']) > 0).length;
-  const totalDisp  = dados.reduce((s, r) => s + num(r['Estoque Dispon\u00edvel']), 0);
-  const totalRep   = dados.reduce((s, r) => s + num(r['Reposi\u00e7\u00e3o a Chegar']), 0);
-  const totalMedia = dados.reduce((s, r) => s + num(r['M\u00e9dia de Vendas Di\u00e1rias 90D']), 0);
-  const cobs = dados.filter(r => num(r['M\u00e9dia de Vendas Di\u00e1rias 90D']) > 0).map(r => num(r['Cobertura']));
-  const cobMedia = cobs.length ? cobs.reduce((a,b) => a+b,0) / cobs.length : 0;
-  const totalSug = dados.reduce((s, r) => s + num(r['Sugest\u00e3o de Compra']), 0);
-
+  const emEst = dados.filter(r=>n(r['Estoque Disponível'])>0).length;
+  const disp  = dados.reduce((s,r)=>s+n(r['Estoque Disponível']),0);
+  const rep   = dados.reduce((s,r)=>s+n(r['Reposição a Chegar']),0);
+  const media = dados.reduce((s,r)=>s+n(r['Média de Vendas Diárias 90D']),0);
+  const cobs  = dados.filter(r=>n(r['Média de Vendas Diárias 90D'])>0).map(r=>n(r['Cobertura']));
+  const cobM  = cobs.length ? cobs.reduce((a,b)=>a+b,0)/cobs.length : 0;
+  const sug   = dados.reduce((s,r)=>s+n(r['Sugestão de Compra']),0);
   document.getElementById('k-total').textContent      = dados.length;
-  document.getElementById('k-em-estoque').textContent = emEstoque;
-  document.getElementById('k-disp').textContent       = Math.round(totalDisp).toLocaleString('pt-BR');
-  document.getElementById('k-rep').textContent        = Math.round(totalRep).toLocaleString('pt-BR');
-  document.getElementById('k-media').textContent      = totalMedia.toFixed(1);
-  document.getElementById('k-cob').textContent        = Math.round(cobMedia) + 'd';
-  document.getElementById('k-sug').textContent        = Math.round(totalSug).toLocaleString('pt-BR');
+  document.getElementById('k-em-estoque').textContent = emEst;
+  document.getElementById('k-disp').textContent       = Math.round(disp).toLocaleString('pt-BR');
+  document.getElementById('k-rep').textContent        = Math.round(rep).toLocaleString('pt-BR');
+  document.getElementById('k-media').textContent      = media.toFixed(1);
+  document.getElementById('k-cob').textContent        = Math.round(cobM)+'d';
+  document.getElementById('k-sug').textContent        = Math.round(sug).toLocaleString('pt-BR');
 }
 
-/* ── ORDENAÇÃO ── */
-function ordenar(dados) {
-  const numCols = ['Estoque Dispon\u00edvel','Reposi\u00e7\u00e3o a Chegar','Estoque Total','M\u00e9dia de Vendas Di\u00e1rias 90D','Cobertura','Sugest\u00e3o de Compra'];
-  return [...dados].sort((a, b) => {
-    let va = a[sortCol] || '', vb = b[sortCol] || '';
-    if (numCols.includes(sortCol)) { va = num(va); vb = num(vb); }
-    else { va = va.toLowerCase(); vb = vb.toLowerCase(); }
-    if (va < vb) return sortDir === 'asc' ? -1 : 1;
-    if (va > vb) return sortDir === 'asc' ?  1 : -1;
-    return 0;
+/* ORDENAÇÃO */
+function ordenar(d) {
+  const nums = ['Estoque Disponível','Reposição a Chegar','Estoque Total','Média de Vendas Diárias 90D','Cobertura','Sugestão de Compra'];
+  return [...d].sort((a,b) => {
+    let va=a[sortCol]||'', vb=b[sortCol]||'';
+    if(nums.includes(sortCol)){va=n(va);vb=n(vb);}
+    else{va=va.toLowerCase();vb=vb.toLowerCase();}
+    return va<vb?(sortDir==='asc'?-1:1):va>vb?(sortDir==='asc'?1:-1):0;
   });
 }
-
-function clicarColuna(col) {
-  if (sortCol === col) sortDir = sortDir === 'asc' ? 'desc' : 'asc';
-  else { sortCol = col; sortDir = 'asc'; }
+function clicarCol(col) {
+  sortDir = sortCol===col ? (sortDir==='asc'?'desc':'asc') : 'asc';
+  sortCol = col;
   renderTabela();
 }
 
-/* ── TABELA ── */
-function renderTabela(todosPrint) {
-  const ordenados = ordenar(dadosFiltrados);
-  const total  = ordenados.length;
-  const inicio = todosPrint ? 0 : (paginaAtual - 1) * POR_PAGINA;
-  const fim_   = todosPrint ? total : inicio + POR_PAGINA;
-  const pagina = ordenados.slice(inicio, fim_);
-
-  document.getElementById('tabela-count').textContent = total + ' itens';
-
-  if (!total) {
-    document.getElementById('tabela-container').innerHTML = '<div class="estado">Nenhum item encontrado.</div>';
-    document.getElementById('pag-info').textContent = '';
-    document.getElementById('pag-btns').innerHTML = '';
+/* TABELA */
+function renderTabela(tudo) {
+  const ord   = ordenar(dadosFiltrados);
+  const total = ord.length;
+  const ini   = tudo ? 0 : (paginaAtual-1)*POR_PAGINA;
+  const page  = ord.slice(ini, tudo ? total : ini+POR_PAGINA);
+  document.getElementById('tabela-count').textContent = total+' itens';
+  if(!total) {
+    document.getElementById('tabela-container').innerHTML='<div class="estado">Nenhum item encontrado.</div>';
+    document.getElementById('pag-info').textContent='';
+    document.getElementById('pag-btns').innerHTML='';
     return;
   }
-
-  const cols = [
-    { key: '', label: 'Foto', sortable: false },
-    { key: 'C\u00f3digo', label: 'C\u00f3digo', sortable: true },
-    { key: 'Descri\u00e7\u00e3o', label: 'Descri\u00e7\u00e3o', sortable: true },
-    { key: 'Estoque Dispon\u00edvel', label: 'Estoque Disp.', sortable: true },
-    { key: 'Cobertura', label: 'Cobertura (d)', sortable: true },
-    { key: 'Sugest\u00e3o de Compra', label: 'Sugest\u00e3o Compra', sortable: true },
+  const cols=[
+    {k:'',l:'Foto',s:false},
+    {k:'Código',l:'Código',s:true},
+    {k:'Descrição',l:'Descrição',s:true},
+    {k:'Estoque Disponível',l:'Estoque Disp.',s:true},
+    {k:'Cobertura',l:'Cobertura (d)',s:true},
+    {k:'Sugestão de Compra',l:'Sugestão Compra',s:true},
   ];
-
   const thead = cols.map(c => {
-    if (!c.sortable) return '<th style="width:52px"></th>';
-    let cls = '';
-    if (sortCol === c.key) cls = sortDir === 'asc' ? ' class="sort-asc"' : ' class="sort-desc"';
-    return `<th${cls} onclick="clicarColuna('${c.key}')">${c.label}</th>`;
+    if(!c.s) return '<th style="width:52px"></th>';
+    const cls = sortCol===c.k ? (sortDir==='asc'?' class="sort-asc"':' class="sort-desc"') : '';
+    return `<th${cls} onclick="clicarCol('${c.k}')">${c.l}</th>`;
   }).join('');
-
-  const tbody = pagina.map(r => {
-    const img = r['URL Imagem']
-      ? `<img class="prod-img" src="${r['URL Imagem']}" alt="" loading="lazy" onerror="this.outerHTML='<div class=\'img-placeholder\'>📦</div>'">`
-      : '<div class="img-placeholder">📦</div>';
-    const cob = num(r['Cobertura']);
-    const cobStr = cob > 0 ? Math.round(cob) + 'd' : '—';
-    const sug = Math.round(num(r['Sugest\u00e3o de Compra']));
-    const sugStr = sug > 0
-      ? `<strong style="color:var(--verde)">${sug.toLocaleString('pt-BR')}</strong>`
-      : '<span style="color:var(--cinza-texto)">0</span>';
+  const tbody = page.map(r => {
+    const urlImg = r['URL Imagem']||'';
+    const img = urlImg
+      ? `<img class="prod-img" src="${urlImg}" alt="" loading="lazy" onclick="lbAbrir('${urlImg.replace(/'/g,"\'")}',event)" onerror="this.outerHTML='<div class=\'img-ph\'>&#128230;</div>'">`
+      : '<div class="img-ph">&#128230;</div>';
+    const cob = n(r['Cobertura']);
+    const sug = Math.round(n(r['Sugestão de Compra']));
     return `<tr>
       <td style="width:52px">${img}</td>
-      <td class="cod">${r['C\u00f3digo']||'—'}</td>
-      <td style="max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r['Descri\u00e7\u00e3o']||''}">${r['Descri\u00e7\u00e3o']||'—'}</td>
-      <td style="text-align:right">${Math.round(num(r['Estoque Dispon\u00edvel'])).toLocaleString('pt-BR')}</td>
-      <td style="text-align:right">${cobStr}</td>
-      <td style="text-align:right">${sugStr}</td>
+      <td class="cod">${r['Código']||'—'}</td>
+      <td style="max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${r['Descrição']||''}">${r['Descrição']||'—'}</td>
+      <td style="text-align:right">${Math.round(n(r['Estoque Disponível'])).toLocaleString('pt-BR')}</td>
+      <td style="text-align:right">${cob>0?Math.round(cob)+'d':'—'}</td>
+      <td style="text-align:right">${sug>0?`<strong style="color:var(--verde)">${sug.toLocaleString('pt-BR')}</strong>`:'<span style="color:var(--cinza-texto)">0</span>'}</td>
     </tr>`;
   }).join('');
-
-  document.getElementById('tabela-container').innerHTML =
-    `<table><thead><tr>${thead}</tr></thead><tbody>${tbody}</tbody></table>`;
-
-  if (!todosPrint) {
-    const totalPags = Math.ceil(total / POR_PAGINA);
-    const fim = Math.min(inicio + POR_PAGINA, total);
-    document.getElementById('pag-info').textContent = `Mostrando ${inicio+1}\u2013${fim} de ${total} itens`;
-    let btns = `<button onclick="irPara(${paginaAtual-1})" ${paginaAtual===1?'disabled':''}>&#8249;</button>`;
-    pagRange(paginaAtual, totalPags).forEach(p => {
-      if (p === '…') btns += '<button disabled>…</button>';
-      else btns += `<button class="${p===paginaAtual?'ativo':''}" onclick="irPara(${p})">${p}</button>`;
-    });
-    btns += `<button onclick="irPara(${paginaAtual+1})" ${paginaAtual===totalPags?'disabled':''}>&#8250;</button>`;
-    document.getElementById('pag-btns').innerHTML = btns;
+  document.getElementById('tabela-container').innerHTML=`<table><thead><tr>${thead}</tr></thead><tbody>${tbody}</tbody></table>`;
+  if(!tudo) {
+    const tp=Math.ceil(total/POR_PAGINA), fim=Math.min(ini+POR_PAGINA,total);
+    document.getElementById('pag-info').textContent=`Mostrando ${ini+1}–${fim} de ${total} itens`;
+    let b=`<button onclick="irPara(${paginaAtual-1})" ${paginaAtual===1?'disabled':''}>&#8249;</button>`;
+    pagRange(paginaAtual,tp).forEach(p=>{ b+=p==='…'?'<button disabled>…</button>':`<button class="${p===paginaAtual?'ativo':''}" onclick="irPara(${p})">${p}</button>`; });
+    b+=`<button onclick="irPara(${paginaAtual+1})" ${paginaAtual===tp?'disabled':''}>&#8250;</button>`;
+    document.getElementById('pag-btns').innerHTML=b;
   }
 }
-
-function pagRange(atual, total) {
-  if (total <= 7) return Array.from({length: total}, (_, i) => i + 1);
-  if (atual <= 4) return [1,2,3,4,5,'…',total];
-  if (atual >= total-3) return [1,'…',total-4,total-3,total-2,total-1,total];
-  return [1,'…',atual-1,atual,atual+1,'…',total];
+function pagRange(a,t) {
+  if(t<=7) return Array.from({length:t},(_,i)=>i+1);
+  if(a<=4) return [1,2,3,4,5,'…',t];
+  if(a>=t-3) return [1,'…',t-4,t-3,t-2,t-1,t];
+  return [1,'…',a-1,a,a+1,'…',t];
 }
-
 function irPara(p) {
-  const total = Math.ceil(dadosFiltrados.length / POR_PAGINA);
-  if (p < 1 || p > total) return;
-  paginaAtual = p;
-  renderTabela();
-  window.scrollTo({top: 0, behavior: 'smooth'});
+  const t=Math.ceil(dadosFiltrados.length/POR_PAGINA);
+  if(p<1||p>t) return;
+  paginaAtual=p; renderTabela();
+  window.scrollTo({top:0,behavior:'smooth'});
 }
 
-/* ── FILTROS ── */
-function filtrarEPaginar() {
-  const busca = document.getElementById('f-busca').value.toLowerCase();
-  dadosFiltrados = dadosOriginais.filter(r =>
-    (!busca || (r['C\u00f3digo']||'').toLowerCase().includes(busca) || (r['Descri\u00e7\u00e3o']||'').toLowerCase().includes(busca))
-    && (multiState.marca.size === 0 || multiState.marca.has(r['Marca']))
-    && (multiState.linha.size === 0 || multiState.linha.has(r['Linha']))
-    && (multiState.tipo.size  === 0 || multiState.tipo.has(r['Tipo']))
+/* FILTROS */
+function aplicarFiltros() {
+  const b=document.getElementById('f-busca').value.toLowerCase();
+  dadosFiltrados=dadosOriginais.filter(r=>
+    (!b||(r['Código']||'').toLowerCase().includes(b)||(r['Descrição']||'').toLowerCase().includes(b))
+    &&(msSel.marca.size===0||msSel.marca.has(r['Marca']))
+    &&(msSel.linha.size===0||msSel.linha.has(r['Linha']))
+    &&(msSel.tipo.size===0 ||msSel.tipo.has(r['Tipo']))
   );
-  paginaAtual = 1;
-  renderKPIs(dadosFiltrados);
-  renderTabela();
+  paginaAtual=1; renderKPIs(dadosFiltrados); renderTabela();
 }
 
-/* ── PDF ── */
-function gerarPDF() {
-  renderTabela(true); // expande todos os itens
-  window.print();
-  setTimeout(() => renderTabela(), 500); // restaura paginação
-}
+/* LIGHTBOX */
+function lbAbrir(src, e) { e.stopPropagation(); document.getElementById('lb-img').src=src; document.getElementById('lb').classList.add('aberto'); document.body.style.overflow='hidden'; }
+function lbFechar() { document.getElementById('lb').classList.remove('aberto'); document.getElementById('lb-img').src=''; document.body.style.overflow=''; }
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') lbFechar(); });
 
-/* ── CARREGAR DADOS ── */
+/* PDF */
+function gerarPDF() { renderTabela(true); window.print(); setTimeout(()=>renderTabela(),800); }
+
+/* CARREGAR */
 function carregarDados() {
-  document.getElementById('update-time').textContent = 'Atualizando...';
-  document.getElementById('tabela-container').innerHTML = '<div class="estado">Carregando dados da planilha...</div>';
+  document.getElementById('update-time').textContent='Atualizando...';
+  document.getElementById('tabela-container').innerHTML='<div class="estado">Carregando dados da planilha...</div>';
   fetch(CSV_URL)
-    .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
-    .then(text => {
-      dadosOriginais = parseCSV(text);
-      ['marca','linha','tipo'].forEach(c => popularMultiSelect(c, dadosOriginais));
-      dadosFiltrados = [...dadosOriginais];
-      paginaAtual = 1;
-      renderKPIs(dadosFiltrados);
-      renderTabela();
-      const agora = new Date().toLocaleString('pt-BR', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
-      document.getElementById('update-time').textContent = 'Última atualização: ' + agora;
+    .then(r=>{ if(!r.ok) throw new Error('HTTP '+r.status); return r.text(); })
+    .then(text=>{
+      dadosOriginais=parseCSV(text);
+      ['marca','linha','tipo'].forEach(c=>msPopular(c,dadosOriginais));
+      dadosFiltrados=[...dadosOriginais];
+      paginaAtual=1; renderKPIs(dadosFiltrados); renderTabela();
+      const ag=new Date().toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+      document.getElementById('update-time').textContent='Última atualização: '+ag;
     })
-    .catch(err => {
-      document.getElementById('tabela-container').innerHTML = `<div class="estado erro">Não foi possível carregar os dados.<br><small>${err.message}</small></div>`;
-      document.getElementById('update-time').textContent = 'Erro ao carregar';
+    .catch(err=>{
+      document.getElementById('tabela-container').innerHTML=`<div class="estado erro">Não foi possível carregar os dados.<br><small>${err.message}</small></div>`;
+      document.getElementById('update-time').textContent='Erro ao carregar';
     });
 }
-
 carregarDados();
-
-/* ── LIGHTBOX ── */
-function abrirLightbox(src) {{
-  document.getElementById('lightbox-img').src = src;
-  document.getElementById('lightbox').classList.add('open');
-  document.body.style.overflow = 'hidden';
-}}
-function fecharLightbox() {{
-  document.getElementById('lightbox').classList.remove('open');
-  document.getElementById('lightbox-img').src = '';
-  document.body.style.overflow = '';
-}}
-document.addEventListener('keydown', e => {{ if (e.key === 'Escape') fecharLightbox(); }});
-
 </script>
 </body>
 </html>
