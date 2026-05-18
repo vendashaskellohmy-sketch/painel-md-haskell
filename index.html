@@ -235,6 +235,45 @@
   .estado { text-align: center; padding: 3rem 1rem; color: var(--cinza-texto); font-size: 14px; }
   .estado.erro { color: #c0392b; }
 
+
+  /* ── LIGHTBOX ── */
+  .lightbox-overlay {{
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.82);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    cursor: zoom-out;
+  }}
+  .lightbox-overlay.open {{
+    display: flex;
+  }}
+  .lightbox-img {{
+    max-width: 90vw;
+    max-height: 88vh;
+    border-radius: 10px;
+    box-shadow: 0 8px 40px rgba(0,0,0,.5);
+    object-fit: contain;
+    cursor: default;
+  }}
+  .lightbox-close {{
+    position: fixed;
+    top: 18px;
+    right: 24px;
+    color: #fff;
+    font-size: 32px;
+    cursor: pointer;
+    line-height: 1;
+    opacity: .8;
+    background: none;
+    border: none;
+    font-weight: 300;
+  }}
+  .lightbox-close:hover {{ opacity: 1; }}
+  .prod-img {{ cursor: zoom-in; }}
+
   /* ── PRINT / PDF ── */
   @media print {
     @page { size: A4 landscape; margin: 12mm; }
@@ -270,6 +309,12 @@
     <button class="btn btn-atualizar" onclick="carregarDados()">↻ Atualizar</button>
   </div>
 </header>
+
+
+<div class="lightbox-overlay" id="lightbox" onclick="fecharLightbox()">
+  <button class="lightbox-close" onclick="fecharLightbox()">&#x2715;</button>
+  <img class="lightbox-img" id="lightbox-img" src="" alt="" onclick="event.stopPropagation()">
+</div>
 
 <main class="container">
 
@@ -602,6 +647,20 @@ function carregarDados() {
 }
 
 carregarDados();
+
+/* ── LIGHTBOX ── */
+function abrirLightbox(src) {{
+  document.getElementById('lightbox-img').src = src;
+  document.getElementById('lightbox').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}}
+function fecharLightbox() {{
+  document.getElementById('lightbox').classList.remove('open');
+  document.getElementById('lightbox-img').src = '';
+  document.body.style.overflow = '';
+}}
+document.addEventListener('keydown', e => {{ if (e.key === 'Escape') fecharLightbox(); }});
+
 </script>
 </body>
 </html>
