@@ -253,11 +253,20 @@ function msPopular(campo, dados) {
   drop.querySelectorAll('.ms-item').forEach(el => {
     el.addEventListener('click', e => {
       e.stopPropagation();
+      e.preventDefault();
       const val = el.dataset.val;
       const c   = el.dataset.campo;
       if(val==='__todos__') { msSel[c].clear(); }
       else { if(msSel[c].has(val)) msSel[c].delete(val); else msSel[c].add(val); }
-      msPopular(c, dadosOriginais);
+      // Atualizar checkbox visualmente sem recriar o DOM
+      if(val==='__todos__') {
+        drop.querySelectorAll('input[type=checkbox]').forEach(cb => cb.checked = false);
+        drop.querySelector('input[type=checkbox]').checked = true;
+      } else {
+        el.querySelector('input[type=checkbox]').checked = msSel[c].has(val);
+        const todosChk = drop.querySelector('.ms-item[data-val="__todos__"] input');
+        if(todosChk) todosChk.checked = msSel[c].size === 0;
+      }
       msLabel(c);
       aplicarFiltros();
     });
