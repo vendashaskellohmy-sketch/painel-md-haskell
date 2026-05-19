@@ -25,7 +25,7 @@
   .btn-pdf { background:#495057; }
   .btn-pdf:hover { background:#343a40; }
   .container { max-width:1400px; margin:0 auto; padding:1.5rem 1.5rem 3rem; }
-  .kpis { display:grid; grid-template-columns:repeat(5,1fr); gap:12px; margin-bottom:1.25rem; }
+  .kpis { display:grid; grid-template-columns:repeat(6,1fr); gap:12px; margin-bottom:1.25rem; }
   @media(max-width:1000px){ .kpis{ grid-template-columns:repeat(3,1fr); } }
   @media(max-width:600px) { .kpis{ grid-template-columns:repeat(2,1fr); } }
   .kpi { background:var(--branco); border-radius:10px; padding:14px 16px; border:1px solid var(--cinza-borda); border-left:4px solid var(--verde-mid); }
@@ -84,7 +84,7 @@
     body { background:white; }
     .header { position:static; box-shadow:none; background:#1b4332 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
     .container { padding:0; max-width:100%; }
-    .kpis { grid-template-columns:repeat(5,1fr) !important; gap:6px; margin-bottom:10px; }
+    .kpis { grid-template-columns:repeat(6,1fr) !important; gap:6px; margin-bottom:10px; }
     .kpi { padding:8px 10px; border-left:3px solid #52b788 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
     .kpi-value { font-size:16px; }
     .filtros-card, .paginacao, .header-btns, .lb { display:none !important; }
@@ -115,11 +115,12 @@
 
 <main class="container">
   <div class="kpis">
+    <div class="kpi"><div class="kpi-label">Qntd. Vendida (90d)</div><div class="kpi-value" id="k-vendida">—</div><div class="kpi-sub">unidades</div></div>
+    <div class="kpi"><div class="kpi-label">Valor Vendido (90d)</div><div class="kpi-value" style="font-size:18px" id="k-valor">—</div><div class="kpi-sub">R$</div></div>
+    <div class="kpi"><div class="kpi-label">Média Diária</div><div class="kpi-value" id="k-media">—</div><div class="kpi-sub">unidades / dia</div></div>
     <div class="kpi"><div class="kpi-label">Estoque Disponível</div><div class="kpi-value" id="k-disp">—</div><div class="kpi-sub">unidades</div></div>
     <div class="kpi" style="border-left-color:var(--verde-escuro)"><div class="kpi-label">Custo em Estoque</div><div class="kpi-value" style="font-size:18px" id="k-custo">—</div><div class="kpi-sub">Disp. × Custo Unitário</div></div>
     <div class="kpi"><div class="kpi-label">Cobertura Média</div><div class="kpi-value" id="k-cob">—</div><div class="kpi-sub">dias de estoque</div></div>
-    <div class="kpi"><div class="kpi-label">Reposição a Chegar</div><div class="kpi-value" id="k-rep">—</div><div class="kpi-sub">unidades em pedido</div></div>
-    <div class="kpi"><div class="kpi-label">Sugestão de Compra</div><div class="kpi-value" id="k-sug">—</div><div class="kpi-sub">unidades sugeridas</div></div>
   </div>
 
   <div class="filtros-card">
@@ -244,21 +245,22 @@ function onSliderMax() {
 }
 
 function renderKPIs(dados) {
-  var disp=0, rep=0, media=0, cobSum=0, cobCt=0, sug=0, custo=0;
+  var disp=0, rep=0, media=0, cobSum=0, cobCt=0, custo=0, vendida=0, valor=0;
   dados.forEach(function(r){
-    disp  += n(r['Estoque Dispon\u00edvel']);
-    rep   += n(r['Reposi\u00e7\u00e3o a Chegar']);
-    media += n(r['M\u00e9dia de Vendas Di\u00e1rias 90D']);
-    sug   += n(r['Sugest\u00e3o de Compra']);
-    custo += custoTotal(r);
+    disp    += n(r['Estoque Dispon\u00edvel']);
+    rep     += n(r['Reposi\u00e7\u00e3o a Chegar']);
+    media   += n(r['M\u00e9dia de Vendas Di\u00e1rias 90D']);
+    custo   += custoTotal(r);
+    vendida += n(r['Total F\u00edsico 90D']);
+    valor   += n(r['Total Valor 90D']);
     if(n(r['M\u00e9dia de Vendas Di\u00e1rias 90D'])>0){ cobSum+=n(r['Cobertura']); cobCt++; }
   });
-  document.getElementById('k-disp').textContent  = Math.round(disp).toLocaleString('pt-BR');
-  document.getElementById('k-rep').textContent   = Math.round(rep).toLocaleString('pt-BR');
-  document.getElementById('k-media').textContent = media.toFixed(1);
-  document.getElementById('k-cob').textContent   = (cobCt?Math.round(cobSum/cobCt):0)+'d';
-  document.getElementById('k-sug').textContent   = Math.round(sug).toLocaleString('pt-BR');
-  document.getElementById('k-custo').textContent = 'R$ '+custo.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  document.getElementById('k-vendida').textContent = Math.round(vendida).toLocaleString('pt-BR');
+  document.getElementById('k-valor').textContent   = 'R$ '+valor.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  document.getElementById('k-media').textContent   = media.toFixed(1);
+  document.getElementById('k-disp').textContent    = Math.round(disp).toLocaleString('pt-BR');
+  document.getElementById('k-cob').textContent     = (cobCt?Math.round(cobSum/cobCt):0)+'d';
+  document.getElementById('k-custo').textContent   = 'R$ '+custo.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 }
 
 function ordenar(d) {
