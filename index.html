@@ -294,7 +294,7 @@ function renderKPIs(dados){
 }
 
 function ordenar(d){
-  var nums=['Estoque Dispon\u00edvel','Reposi\u00e7\u00e3o a Chegar','Estoque Total','Cobertura','Custo Total'];
+  var nums=['Venda Acumulada Und','Estoque Dispon\u00edvel','Reposi\u00e7\u00e3o a Chegar','Estoque Total','Cobertura','Custo Total'];
   return d.slice().sort(function(a,b){
     var va,vb;
     if(sortCol==='Custo Total'){va=custoTotal(a);vb=custoTotal(b);}
@@ -316,6 +316,7 @@ function renderTabela(tudo){
     {k:'',l:'Foto',s:false},
     {k:'C\u00f3digo',l:'C\u00f3digo',s:true},
     {k:'Descri\u00e7\u00e3o',l:'Descri\u00e7\u00e3o',s:true},
+    {k:'Venda Acumulada Und',l:'Venda Acum. (und)',s:true},
     {k:'Estoque Dispon\u00edvel',l:'Estoque Disp.',s:true},
     {k:'Custo Total',l:'Custo em Estoque',s:true},
     {k:'Cobertura',l:'Cobertura (d)',s:true}
@@ -336,6 +337,7 @@ function renderTabela(tudo){
       +'<td style="width:52px">'+img+'</td>'
       +'<td class="cod">'+(r['C\u00f3digo']||'\u2014')+'</td>'
       +'<td style="max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+(r['Descri\u00e7\u00e3o']||'')+'">'+(r['Descri\u00e7\u00e3o']||'\u2014')+'</td>'
+      +'<td style="text-align:right">'+Math.round(n(r['Venda Acumulada Und'])).toLocaleString('pt-BR')+'</td>'
       +'<td style="text-align:right">'+Math.round(n(r['Estoque Dispon\u00edvel'])).toLocaleString('pt-BR')+'</td>'
       +'<td style="text-align:right">'+(ct>0?'R$ '+ct.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}):'<span style="color:var(--cinza-texto)">\u2014</span>')+'</td>'
       +'<td style="text-align:right">'+(cob>0?Math.round(cob)+'d':'\u2014')+'</td>'
