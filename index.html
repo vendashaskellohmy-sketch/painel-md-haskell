@@ -360,7 +360,8 @@ function irPara(p){var t=Math.ceil(dadosFiltrados.length/POR_PAGINA);if(p<1||p>t
 function aplicarFiltros(){
   var b=document.getElementById('f-busca').value.toLowerCase();
   var marca=document.getElementById('f-marca').value,linha=document.getElementById('f-linha').value,tipo=document.getElementById('f-tipo').value;
-  var cMin=parseInt(document.getElementById('sl-custo-min').value),cMax=parseInt(document.getElementById('sl-custo-max').value);
+  var cMinEl=document.getElementById('sl-custo-min'),cMaxEl=document.getElementById('sl-custo-max');
+  var cMin=cMinEl?parseInt(cMinEl.value)||0:0, cMax=cMaxEl?parseInt(cMaxEl.value)||Infinity:Infinity;
   dadosFiltrados=dadosOriginais.filter(function(r){
     if(!sacheAtivo&&(r["Tipo"]||"").toLowerCase().indexOf("sach")>=0) return false;
     var estq=n(r['Estoque Dispon\u00edvel']),ct=custoTotal(r);
