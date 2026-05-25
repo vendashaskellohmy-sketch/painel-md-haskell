@@ -161,16 +161,7 @@
     <label>Marca<select id="f-marca" onchange="aplicarFiltros()"><option value="">Todas</option></select></label>
     <label>Linha<select id="f-linha" onchange="aplicarFiltros()"><option value="">Todas</option></select></label>
     <label>Tipo<select id="f-tipo" onchange="aplicarFiltros()"><option value="">Todos</option></select></label>
-    <label class="slider-wrap">
-      Qtd. em Estoque
-      <div class="slider-label-row"><span id="sl-qtd-val-min">0</span><span id="sl-qtd-val-max">0</span></div>
-      <div class="range-track">
-        <div class="range-bg"></div><div class="range-fill" id="sl-qtd-fill"></div>
-        <input type="range" id="sl-qtd-min" min="0" max="1000" value="0" oninput="onSlider('qtd','min')">
-        <input type="range" id="sl-qtd-max" min="0" max="1000" value="1000" oninput="onSlider('qtd','max')">
-      </div>
-    </label>
-    <label class="slider-wrap">
+<label class="slider-wrap">
       Custo em Estoque
       <div class="slider-label-row"><span id="sl-custo-val-min">R$ 0</span><span id="sl-custo-val-max">R$ 0</span></div>
       <div class="range-track">
@@ -371,14 +362,12 @@ function irPara(p){var t=Math.ceil(dadosFiltrados.length/POR_PAGINA);if(p<1||p>t
 function aplicarFiltros(){
   var b=document.getElementById('f-busca').value.toLowerCase();
   var marca=document.getElementById('f-marca').value,linha=document.getElementById('f-linha').value,tipo=document.getElementById('f-tipo').value;
-  var qMin=parseInt(document.getElementById('sl-qtd-min').value),qMax=parseInt(document.getElementById('sl-qtd-max').value);
   var cMin=parseInt(document.getElementById('sl-custo-min').value),cMax=parseInt(document.getElementById('sl-custo-max').value);
   dadosFiltrados=dadosOriginais.filter(function(r){
     if(!sacheAtivo&&(r["Tipo"]||"").toLowerCase().indexOf("sach")>=0) return false;
     var estq=n(r['Estoque Dispon\u00edvel']),ct=custoTotal(r);
     return(!b||(r['C\u00f3digo']||'').toLowerCase().indexOf(b)>=0||(r['Descri\u00e7\u00e3o']||'').toLowerCase().indexOf(b)>=0)
       &&(!marca||r['Marca']===marca)&&(!linha||r['Linha']===linha)&&(!tipo||r['Tipo']===tipo)
-      &&(estq>=qMin&&estq<=qMax)&&(ct>=cMin&&ct<=cMax);
   });
   paginaAtual=1;renderKPIs(dadosFiltrados);renderTabela();
 }
