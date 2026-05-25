@@ -161,15 +161,6 @@
     <label>Marca<select id="f-marca" onchange="aplicarFiltros()"><option value="">Todas</option></select></label>
     <label>Linha<select id="f-linha" onchange="aplicarFiltros()"><option value="">Todas</option></select></label>
     <label>Tipo<select id="f-tipo" onchange="aplicarFiltros()"><option value="">Todos</option></select></label>
-<label class="slider-wrap">
-      Custo em Estoque
-      <div class="slider-label-row"><span id="sl-custo-val-min">R$ 0</span><span id="sl-custo-val-max">R$ 0</span></div>
-      <div class="range-track">
-        <div class="range-bg"></div><div class="range-fill" id="sl-custo-fill"></div>
-        <input type="range" id="sl-custo-min" min="0" max="100000" value="0" oninput="onSlider('custo','min')">
-        <input type="range" id="sl-custo-max" min="0" max="100000" value="100000" oninput="onSlider('custo','max')">
-      </div>
-    </label>
     <label style="flex-direction:row;align-items:center;gap:8px;height:34px;margin-top:18px;justify-content:flex-end">
       <span style="font-size:12px;font-weight:500;color:var(--cinza-texto)">Mostrar sachê</span>
       <div class="toggle-wrap" onclick="toggleSache()" id="toggle-sache"><div class="toggle-thumb"></div></div>
@@ -256,35 +247,10 @@ function popularFiltros(dados){
   var qMax=dadosOriginais.reduce(function(m,r){return Math.max(m,n(r['Estoque Dispon\u00edvel']));},0);
   document.getElementById('sl-qtd-min').max=qMax; document.getElementById('sl-qtd-min').value=0;
   document.getElementById('sl-qtd-max').max=qMax; document.getElementById('sl-qtd-max').value=qMax;
-  atualizarSlider('qtd');
-  var cMax=Math.ceil(dadosOriginais.reduce(function(m,r){return Math.max(m,custoTotal(r));},0));
-  document.getElementById('sl-custo-min').max=cMax; document.getElementById('sl-custo-min').value=0;
-  document.getElementById('sl-custo-max').max=cMax; document.getElementById('sl-custo-max').value=cMax;
-  atualizarSlider('custo');
 }
 
-function atualizarSlider(tipo){
-  var vMin=parseInt(document.getElementById('sl-'+tipo+'-min').value);
-  var vMax=parseInt(document.getElementById('sl-'+tipo+'-max').value);
-  var max=parseInt(document.getElementById('sl-'+tipo+'-max').max)||1;
-  document.getElementById('sl-'+tipo+'-fill').style.left=(vMin/max*100)+'%';
-  document.getElementById('sl-'+tipo+'-fill').style.width=((vMax-vMin)/max*100)+'%';
-  if(tipo==='custo'){
-    document.getElementById('sl-custo-val-min').textContent='R$ '+vMin.toLocaleString('pt-BR');
-    document.getElementById('sl-custo-val-max').textContent='R$ '+vMax.toLocaleString('pt-BR');
-  } else {
-    document.getElementById('sl-qtd-val-min').textContent=vMin;
-    document.getElementById('sl-qtd-val-max').textContent=vMax;
-  }
 }
 
-function onSlider(tipo,lado){
-  var vMin=parseInt(document.getElementById('sl-'+tipo+'-min').value);
-  var vMax=parseInt(document.getElementById('sl-'+tipo+'-max').value);
-  if(lado==='min'&&vMin>vMax) document.getElementById('sl-'+tipo+'-min').value=vMax;
-  if(lado==='max'&&vMax<vMin) document.getElementById('sl-'+tipo+'-max').value=vMin;
-  atualizarSlider(tipo); aplicarFiltros();
-}
 
 function renderKPIs(dados){
   var disp=0,custo=0;
@@ -360,14 +326,12 @@ function irPara(p){var t=Math.ceil(dadosFiltrados.length/POR_PAGINA);if(p<1||p>t
 function aplicarFiltros(){
   var b=document.getElementById('f-busca').value.toLowerCase();
   var marca=document.getElementById('f-marca').value,linha=document.getElementById('f-linha').value,tipo=document.getElementById('f-tipo').value;
-  var cMinEl=document.getElementById('sl-custo-min'),cMaxEl=document.getElementById('sl-custo-max');
-  var cMin=cMinEl?parseInt(cMinEl.value)||0:0, cMax=cMaxEl?parseInt(cMaxEl.value)||Infinity:Infinity;
   dadosFiltrados=dadosOriginais.filter(function(r){
     if(!sacheAtivo&&(r["Tipo"]||"").toLowerCase().indexOf("sach")>=0) return false;
     var estq=n(r['Estoque Dispon\u00edvel']),ct=custoTotal(r);
     return(!b||(r['C\u00f3digo']||'').toLowerCase().indexOf(b)>=0||(r['Descri\u00e7\u00e3o']||'').toLowerCase().indexOf(b)>=0)
       &&(!marca||r['Marca']===marca)&&(!linha||r['Linha']===linha)&&(!tipo||r['Tipo']===tipo)
-      &&(ct>=cMin&&ct<=cMax);
+;
   });
   paginaAtual=1;renderKPIs(dadosFiltrados);renderTabela();
 }
