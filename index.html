@@ -409,16 +409,16 @@ function carregarDados(){
   var inicioAno=new Date().getFullYear()+'-01-01';
   Promise.all([
     sbFetch('md_painel','select=*&limit=10000'),
-    sbFetch('md_vendas_diarias','select=Quantidade&Data=gte.'+inicioAno+'&limit=100000')
+    sbFetch('md_vendas_diarias','select=Quantidade,Valor&Data=gte.'+inicioAno+'&limit=100000')
   ]).then(function(res){
     var dados=res[0],diarias=res[1];
     dadosOriginais=dados;popularFiltros(dadosOriginais);
     dadosFiltrados=dadosOriginais.slice();paginaAtual=1;
     renderKPIs(dadosFiltrados);renderTabela();
-    var totalUnd=0;
-    diarias.forEach(function(d){totalUnd+=n(d['Quantidade']);});
+    var totalUnd=0,totalVal=0;
+    diarias.forEach(function(d){totalUnd+=n(d['Quantidade']);totalVal+=n(d['Valor']||0);});
     document.getElementById('k-vendida').textContent=Math.round(totalUnd).toLocaleString('pt-BR');
-    document.getElementById('k-valor').textContent='—';
+    document.getElementById('k-valor').textContent='R$ '+totalVal.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
     var hoje=new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'});
     document.getElementById('update-time').textContent='Dados de '+hoje+' • atualizado às 08h30';
   }).catch(function(err){
