@@ -115,6 +115,27 @@
     .prod-img { width:32px; height:32px; }
   }
 </style>
+<script>
+var SENHAS_VALIDAS_LOGIN = ['marciana','camacho','priscila','anderson','gustavo','rodrigo','kassya','josimar'];
+function verificarSenha(){
+  var s = document.getElementById('login-senha').value;
+  if(SENHAS_VALIDAS_LOGIN.indexOf(s) !== -1){
+    document.getElementById('login-overlay').classList.add('oculto');
+    sessionStorage.setItem('auth','1');
+    if(typeof carregarDados === 'function') carregarDados();
+    else window._pendingLogin = true;
+  } else {
+    document.getElementById('login-erro').style.display = 'block';
+    document.getElementById('login-senha').value = '';
+    document.getElementById('login-senha').focus();
+  }
+}
+document.addEventListener('keydown', function(e){
+  if(e.key === 'Enter' && document.getElementById('login-overlay') && !document.getElementById('login-overlay').classList.contains('oculto')){
+    verificarSenha();
+  }
+});
+</script>
 </head>
 <body>
 <div class="login-overlay" id="login-overlay">
@@ -208,17 +229,6 @@ let dadosOriginais=[], dadosFiltrados=[];
 let paginaAtual=1, sortCol='Descri\u00e7\u00e3o', sortDir='asc';
 let linhaSelecionada=null, graficoAtivo=null;
 
-function verificarSenha(){
-  var s=document.getElementById('login-senha').value;
-  if(SENHAS_VALIDAS.indexOf(s)!==-1){
-    document.getElementById('login-overlay').classList.add('oculto');
-    sessionStorage.setItem('auth','1'); carregarDados();
-  } else {
-    document.getElementById('login-erro').style.display='block';
-    document.getElementById('login-senha').value='';
-    document.getElementById('login-senha').focus();
-  }
-}
 document.addEventListener('keydown',function(e){
   if(e.key==='Enter'&&!document.getElementById('login-overlay').classList.contains('oculto')) verificarSenha();
   if(e.key==='Escape') lbFechar();
