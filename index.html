@@ -95,6 +95,10 @@
   .lb-fechar:hover { background:rgba(0,0,0,.7); }
   .estado { text-align:center; padding:3rem 1rem; color:var(--cinza-texto); font-size:14px; }
   .estado.erro { color:#c0392b; }
+  .toggle-wrap { width:40px; height:22px; background:var(--cinza-borda); border-radius:11px; cursor:pointer; position:relative; transition:background .2s; flex-shrink:0; }
+  .toggle-wrap.ativo { background:var(--verde); }
+  .toggle-thumb { width:16px; height:16px; background:var(--branco); border-radius:50%; position:absolute; top:3px; left:3px; transition:left .2s; box-shadow:0 1px 3px rgba(0,0,0,.2); }
+  .toggle-wrap.ativo .toggle-thumb { left:21px; }
   @media print {
     @page { size:A4 landscape; margin:12mm; }
     body { background:white; }
@@ -147,7 +151,7 @@
 <main class="container">
   <div class="kpis">
     <div class="kpi"><div class="kpi-label">Estoque Disponível</div><div class="kpi-value" id="k-disp">—</div><div class="kpi-sub">unidades</div></div>
-    <div class="kpi" style="border-left-color:var(--verde-escuro)"><div class="kpi-label">Custo em Estoque</div><div class="kpi-value" style="font-size:17px" id="k-custo">—</div><div class="kpi-sub">Disp. × Custo Unitário</div></div>
+    <div class="kpi" style="border-left-color:var(--verde-escuro)"><div class="kpi-label">Custo em Estoque</div><div class="kpi-value" style="font-size:17px" id="k-custo">—</div><div class="kpi-sub">Und. × Custo Unitário</div></div>
     <div class="kpi"><div class="kpi-label">Venda Acumulada (und)</div><div class="kpi-value" id="k-vendida">—</div><div class="kpi-sub">unidades no ano</div></div>
     <div class="kpi"><div class="kpi-label">Venda Acumulada (R$)</div><div class="kpi-value" style="font-size:17px" id="k-valor">—</div><div class="kpi-sub">valor no ano</div></div>
   </div>
@@ -175,6 +179,12 @@
         <input type="range" id="sl-custo-max" min="0" max="100000" value="100000" oninput="onSlider('custo','max')">
       </div>
     </label>
+    <label style="justify-content:flex-end;flex-direction:row;align-items:center;gap:8px;height:34px;margin-top:18px">
+      <span style="font-size:12px;font-weight:500;color:var(--cinza-texto)">Mostrar sachê</span>
+      <div class="toggle-wrap" onclick="toggleSache()" id="toggle-sache">
+        <div class="toggle-thumb" id="toggle-thumb"></div>
+      </div>
+    </label>
   </div>
 
   <div class="grafico-card">
@@ -192,7 +202,10 @@
   <div class="tabela-card">
     <div class="tabela-header">
       <span>Inventário de MDs</span>
-      <span class="tabela-count" id="tabela-count">— itens</span>
+      <div style="display:flex;align-items:center;gap:8px">
+        <button onclick="downloadCSV()" style="background:none;border:1px solid var(--cinza-borda);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;color:var(--cinza-texto);display:flex;align-items:center;gap:4px">&#x2B07; CSV</button>
+        <span class="tabela-count" id="tabela-count">— itens</span>
+      </div>
     </div>
     <div class="tabela-scroll">
       <div id="tabela-container"><div class="estado">Faça login para carregar os dados.</div></div>
@@ -363,6 +376,7 @@ function aplicarFiltros(){
   var qMin=parseInt(document.getElementById('sl-qtd-min').value),qMax=parseInt(document.getElementById('sl-qtd-max').value);
   var cMin=parseInt(document.getElementById('sl-custo-min').value),cMax=parseInt(document.getElementById('sl-custo-max').value);
   dadosFiltrados=dadosOriginais.filter(function(r){
+    if(!sacheAtivo&&(r['Tipo']||'').toLowerCase().indexOf('sach')>=0) return false;
     var estq=n(r['Estoque Dispon\u00edvel']),ct=custoTotal(r);
     return(!b||(r['C\u00f3digo']||'').toLowerCase().indexOf(b)>=0||(r['Descri\u00e7\u00e3o']||'').toLowerCase().indexOf(b)>=0)
       &&(!marca||r['Marca']===marca)&&(!linha||r['Linha']===linha)&&(!tipo||r['Tipo']===tipo)
@@ -381,7 +395,7 @@ function selecionarLinha(tr,codigo,descCod,e){
   document.getElementById('graf-titulo').textContent='Vendas Di\u00e1rias \u2014 '+desc;
   document.getElementById('graf-sub').textContent='C\u00f3digo: '+codigo+' \u2022 Carregando...';
   document.getElementById('graf-wrap').innerHTML='<div class="grafico-placeholder">Carregando hist\u00f3rico...</div>';
-  sbFetch('md_vendas_diarias','select=Data,Quantidade&C%C3%B3digo=eq.'+encodeURIComponent(codigo)+'&order=Data.asc&limit=1000')
+  sbFetch('md_vendas_diarias','select=Data,Quantidade&C%C3%B3digo=eq.'+encodeURIComponent(codigo)+'&Data=gte.'+new Date().getFullYear()+'-01-01&order=Data.asc&limit=1000')
     .then(function(dados){
       document.getElementById('graf-sub').textContent='C\u00f3digo: '+codigo+' \u2022 '+dados.length+' dias com venda';
       if(!dados||!dados.length){
@@ -433,6 +447,34 @@ function lbAbrir(src,e){e.stopPropagation();document.getElementById('lb-img').sr
 function lbFechar(){document.getElementById('lb').classList.remove('aberto');document.getElementById('lb-img').src='';document.body.style.overflow='';}
 function gerarPDF(){renderTabela(true);window.print();setTimeout(function(){renderTabela();},800);}
 
+var sacheAtivo=false;
+function toggleSache(){
+  sacheAtivo=!sacheAtivo;
+  var el=document.getElementById('toggle-sache');
+  if(sacheAtivo) el.classList.add('ativo'); else el.classList.remove('ativo');
+  aplicarFiltros();
+}
+
+function downloadCSV(){
+  var ord=ordenar(dadosFiltrados);
+  var cols=['Código','Descrição','Marca','Linha','Tipo','Venda Acumulada Und','Estoque Disponível','Cobertura'];
+  var linhas=[cols.join(';')];
+  ord.forEach(function(r){
+    linhas.push(cols.map(function(c){
+      if(c==='Cobertura') return n(r[c])>0?Math.round(n(r[c])):'0';
+      var v=r[c]||'';
+      if(typeof v==='string'&&v.indexOf(';')>=0) v='"'+v+'"';
+      return v;
+    }).join(';'));
+  });
+  var blob=new Blob(['﻿'+linhas.join('
+')],{type:'text/csv;charset=utf-8'});
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='materiais_divulgacao_'+new Date().toLocaleDateString('pt-BR').replace(/\//g,'-')+'.csv';
+  a.click();
+}
+
 function carregarDados(){
   document.getElementById('update-time').textContent='Atualizando...';
   document.getElementById('tabela-container').innerHTML='<div class="estado">Carregando dados...</div>';
@@ -441,8 +483,8 @@ function carregarDados(){
       dadosOriginais=dados;popularFiltros(dadosOriginais);
       dadosFiltrados=dadosOriginais.slice();paginaAtual=1;
       renderKPIs(dadosFiltrados);renderTabela();
-      var ag=new Date().toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
-      document.getElementById('update-time').textContent='Última atualização: '+ag;
+      var hoje=new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'});
+      document.getElementById('update-time').textContent='Dados de '+hoje+' • atualizado às 08h30';
     })
     .catch(function(err){
       document.getElementById('tabela-container').innerHTML='<div class="estado erro">Não foi possível carregar.<br><small>'+err.message+'</small></div>';
