@@ -95,10 +95,6 @@
   .lb-fechar:hover { background:rgba(0,0,0,.7); }
   .estado { text-align:center; padding:3rem 1rem; color:var(--cinza-texto); font-size:14px; }
   .estado.erro { color:#c0392b; }
-  .toggle-wrap { width:40px; height:22px; background:var(--cinza-borda); border-radius:11px; cursor:pointer; position:relative; transition:background .2s; flex-shrink:0; }
-  .toggle-wrap.ativo { background:var(--verde); }
-  .toggle-thumb { width:16px; height:16px; background:var(--branco); border-radius:50%; position:absolute; top:3px; left:3px; transition:left .2s; box-shadow:0 1px 3px rgba(0,0,0,.2); }
-  .toggle-wrap.ativo .toggle-thumb { left:21px; }
   @media print {
     @page { size:A4 landscape; margin:12mm; }
     body { background:white; }
@@ -182,11 +178,7 @@ document.addEventListener('keydown', function(e){
     <label>Marca<select id="f-marca" onchange="aplicarFiltros()"><option value="">Todas</option></select></label>
     <label>Linha<select id="f-linha" onchange="aplicarFiltros()"><option value="">Todas</option></select></label>
     <label>Tipo<select id="f-tipo" onchange="aplicarFiltros()"><option value="">Todos</option></select></label>
-    <label style="flex-direction:row;align-items:center;gap:8px;height:34px;margin-top:18px;justify-content:flex-end">
-      <span style="font-size:12px;font-weight:500;color:var(--cinza-texto)">Mostrar sachê</span>
-      <div class="toggle-wrap" onclick="toggleSache()" id="toggle-sache"><div class="toggle-thumb"></div></div>
-    </label>
-  </div>
+    </div>
 
   <div class="grafico-card">
     <div class="grafico-header">
@@ -337,7 +329,6 @@ function aplicarFiltros(){
   var b=document.getElementById('f-busca').value.toLowerCase();
   var marca=document.getElementById('f-marca').value,linha=document.getElementById('f-linha').value,tipo=document.getElementById('f-tipo').value;
   dadosFiltrados=dadosOriginais.filter(function(r){
-    if(!sacheAtivo&&(r["Tipo"]||"").toLowerCase().indexOf("sach")>=0) return false;
     var estq=n(r['Estoque Dispon\u00edvel']),ct=custoTotal(r);
     return(!b||(r['C\u00f3digo']||'').toLowerCase().indexOf(b)>=0||(r['Descri\u00e7\u00e3o']||'').toLowerCase().indexOf(b)>=0)
       &&(!marca||r['Marca']===marca)&&(!linha||r['Linha']===linha)&&(!tipo||r['Tipo']===tipo)
@@ -408,13 +399,6 @@ function lbAbrir(src,e){e.stopPropagation();document.getElementById('lb-img').sr
 function lbFechar(){document.getElementById('lb').classList.remove('aberto');document.getElementById('lb-img').src='';document.body.style.overflow='';}
 function gerarPDF(){renderTabela(true);window.print();setTimeout(function(){renderTabela();},800);}
 
-var sacheAtivo=false;
-function toggleSache(){
-  sacheAtivo=!sacheAtivo;
-  var el=document.getElementById("toggle-sache");
-  if(sacheAtivo) el.classList.add("ativo"); else el.classList.remove("ativo");
-  aplicarFiltros();
-}
 
 function downloadCSV(){
   var ord=ordenar(dadosFiltrados);
