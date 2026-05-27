@@ -168,7 +168,7 @@
       </div>
     </div>
     <div style="position:relative;height:200px" id="graf-wrap">
-      <div class="grafico-placeholder">Selecione um produto clicando em uma linha da tabela</div>
+      <div class="grafico-placeholder">Carregando histórico de vendas...</div>
     </div>
   </div>
 
@@ -356,27 +356,66 @@ function aplicarFiltros(){
       &&(!marca||r['Marca']===marca)&&(!linha||r['Linha']===linha)&&(!tipo||r['Tipo']===tipo);
   });
   paginaAtual=1;renderKPIs(dadosFiltrados);renderTabela();
+  if(!linhaSelecionada) atualizarGraficoTotal();
 }
 
 /* GRÁFICO */
 function selecionarLinha(tr,codigo,descCod,e){
   if(e.target.tagName==='IMG') return;
+  // Clicar no mesmo produto deseleciona e volta para total
+  if(linhaSelecionada===codigo){
+    linhaSelecionada=null;
+    document.querySelectorAll('tr.selecionado').forEach(function(el){el.classList.remove('selecionado');});
+    atualizarGraficoTotal();
+    return;
+  }
   linhaSelecionada=codigo;
   document.querySelectorAll('tr.selecionado').forEach(function(el){el.classList.remove('selecionado');});
   tr.classList.add('selecionado');
   var desc=decodeURIComponent(descCod);
-  document.getElementById('graf-titulo').textContent='Vendas Di\u00e1rias \u2014 '+desc;
-  document.getElementById('graf-sub').textContent='C\u00f3digo: '+codigo+' \u2022 Carregando...';
-  document.getElementById('graf-wrap').innerHTML='<div class="grafico-placeholder">Carregando hist\u00f3rico...</div>';
+  document.getElementById('graf-titulo').textContent='Vendas Diárias — '+desc;
+  document.getElementById('graf-sub').textContent='Código: '+codigo+' • Carregando...';
+  document.getElementById('graf-wrap').innerHTML='<div class="grafico-placeholder">Carregando histórico...</div>';
   sbFetch('md_vendas_diarias','select=Data,Quantidade&C%C3%B3digo=eq.'+encodeURIComponent(codigo)+'&Data=gte.'+new Date().getFullYear()+'-01-01&order=Data.asc&limit=1000')
     .then(function(dados){
-      document.getElementById('graf-sub').textContent='C\u00f3digo: '+codigo+' \u2022 '+dados.length+' dias com venda';
+      document.getElementById('graf-sub').textContent='Código: '+codigo+' • '+dados.length+' dias com venda';
       if(!dados||!dados.length){
         document.getElementById('graf-wrap').innerHTML='<div class="grafico-placeholder">Sem dados de venda para este produto.</div>';
         return;
       }
       renderGrafico(dados);
       document.getElementById('graf-wrap').scrollIntoView({behavior:'smooth',block:'nearest'});
+    })
+    .catch(function(err){
+      document.getElementById('graf-wrap').innerHTML='<div class="grafico-placeholder estado erro">Erro: '+err.message+'</div>';
+    });
+}
+
+function atualizarGraficoTotal(){
+  document.getElementById('graf-titulo').textContent='Vendas Diárias — Total dos filtrados';
+  var codigos=dadosFiltrados.map(function(r){return r['Código'];}).filter(Boolean);
+  if(!codigos.length){
+    document.getElementById('graf-sub').textContent='Nenhum produto nos filtros atuais';
+    document.getElementById('graf-wrap').innerHTML='<div class="grafico-placeholder">Nenhum produto nos filtros atuais.</div>';
+    return;
+  }
+  document.getElementById('graf-sub').textContent=codigos.length+' produtos • Carregando...';
+  document.getElementById('graf-wrap').innerHTML='<div class="grafico-placeholder">Carregando...</div>';
+  var inicioAno=new Date().getFullYear()+'-01-01';
+  var lote=codigos.slice(0,50);
+  var filtroIn=lote.map(function(c){return encodeURIComponent(c);}).join(',');
+  sbFetch('md_vendas_diarias','select=Data,Quantidade&C%C3%B3digo=in.('+filtroIn+')&Data=gte.'+inicioAno+'&order=Data.asc&limit=10000')
+    .then(function(dados){
+      var mapa={};
+      dados.forEach(function(d){var dt=d['Data'];mapa[dt]=(mapa[dt]||0)+n(d['Quantidade']);});
+      var datas=Object.keys(mapa).sort();
+      var agregado=datas.map(function(d){return{Data:d,Quantidade:mapa[d]};});
+      document.getElementById('graf-sub').textContent=codigos.length+' produtos • '+datas.length+' dias com venda';
+      if(!agregado.length){
+        document.getElementById('graf-wrap').innerHTML='<div class="grafico-placeholder">Sem dados de venda para os produtos filtrados.</div>';
+        return;
+      }
+      renderGrafico(agregado);
     })
     .catch(function(err){
       document.getElementById('graf-wrap').innerHTML='<div class="grafico-placeholder estado erro">Erro: '+err.message+'</div>';
