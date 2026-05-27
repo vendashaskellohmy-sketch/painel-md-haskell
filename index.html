@@ -126,6 +126,8 @@
   .ms-opt:hover { background:var(--verde-claro); }
   .ms-opt input { accent-color:var(--verde); width:14px; height:14px; flex-shrink:0; cursor:pointer; }
   .ms-opt label { cursor:pointer; flex:1; margin:0; font-weight:400; }
+  .ms-search { width:100%; padding:6px 10px; border:none; border-bottom:1px solid var(--cinza-borda); font-size:12px; outline:none; box-sizing:border-box; }
+  .ms-search:focus { border-bottom-color:var(--verde); }
   .ms-grp { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.8px; color:var(--cinza-texto); padding:6px 12px 2px; background:var(--cinza-bg); }
 </style>
 </head>
@@ -196,6 +198,24 @@
           <span class="ms-arrow">&#9660;</span>
         </button>
         <div class="ms-dd" id="ms-tipo-dd"></div>
+      </div>
+    </label>
+    <label>Código
+      <div class="ms-wrap">
+        <button type="button" class="ms-btn" id="ms-codigo-btn" onclick="msTog('codigo')">
+          <span class="ms-label" id="ms-codigo-lbl">Todos</span>
+          <span class="ms-arrow">&#9660;</span>
+        </button>
+        <div class="ms-dd" id="ms-codigo-dd" style="max-height:260px"></div>
+      </div>
+    </label>
+    <label>Produto
+      <div class="ms-wrap">
+        <button type="button" class="ms-btn" id="ms-produto-btn" onclick="msTog('produto')">
+          <span class="ms-label" id="ms-produto-lbl">Todos</span>
+          <span class="ms-arrow">&#9660;</span>
+        </button>
+        <div class="ms-dd" id="ms-produto-dd" style="max-height:260px"></div>
       </div>
     </label>
     <label style="flex-direction:row;align-items:center;gap:8px;height:34px;margin-top:18px;justify-content:flex-end">
@@ -296,6 +316,11 @@ function popularFiltros(dados) {
   msPopular('marca', marcas, null);
   msPopular('linha', linhas, null);
   msPopular('tipo',  tipos,  GRUPOS);
+
+    var codigos = dadosOriginais.map(function(r){return r['Código'];}).filter(Boolean).sort();
+  var produtos = dadosOriginais.map(function(r){return r['Descrição'];}).filter(Boolean).sort();
+  msPopularComBusca('codigo', codigos, null);
+  msPopularComBusca('produto', produtos, null);
 }
 
 
@@ -380,15 +405,19 @@ function irPara(p){var t=Math.ceil(dadosFiltrados.length/POR_PAGINA);if(p<1||p>t
 
 function aplicarFiltros() {
   var b = document.getElementById('f-busca').value.toLowerCase();
-  var selMarca = Object.keys(MS['marca']);
-  var selLinha = Object.keys(MS['linha']);
-  var selTipo  = Object.keys(MS['tipo']);
+  var selMarca   = Object.keys(MS['marca']);
+  var selLinha   = Object.keys(MS['linha']);
+  var selTipo    = Object.keys(MS['tipo']);
+  var selCodigo  = Object.keys(MS['codigo']);
+  var selProduto = Object.keys(MS['produto']);
   dadosFiltrados = dadosOriginais.filter(function(r) {
     if (!sacheAtivo && (r['Tipo']||'').toLowerCase().indexOf('sach') >= 0) return false;
     return (!b || (r['Código']||'').toLowerCase().indexOf(b) >= 0 || (r['Descrição']||'').toLowerCase().indexOf(b) >= 0)
-      && (selMarca.length === 0 || selMarca.indexOf(r['Marca']) >= 0)
-      && (selLinha.length === 0 || selLinha.indexOf(r['Linha']) >= 0)
-      && (selTipo.length  === 0 || selTipo.indexOf(r['Tipo'])  >= 0);
+      && (selMarca.length   === 0 || selMarca.indexOf(r['Marca']) >= 0)
+      && (selLinha.length   === 0 || selLinha.indexOf(r['Linha']) >= 0)
+      && (selTipo.length    === 0 || selTipo.indexOf(r['Tipo'])   >= 0)
+      && (selCodigo.length  === 0 || selCodigo.indexOf(r['Código']) >= 0)
+      && (selProduto.length === 0 || selProduto.indexOf(r['Descrição']) >= 0);
   });
   paginaAtual = 1; renderKPIs(dadosFiltrados); renderTabela();
   if (!linhaSelecionada) atualizarGraficoTotal();
@@ -532,14 +561,14 @@ function limparFiltros() {
 
 
 /* ── MULTI-SELEÇÃO ──────────────────────────────────────────── */
-var MS = { marca: {}, linha: {}, tipo: {} };
+var MS = { marca: {}, linha: {}, tipo: {}, codigo: {}, produto: {} };
 
 function msTog(campo) {
   var dd = document.getElementById('ms-' + campo + '-dd');
   var isOpen = dd.classList.contains('open');
   // Fechar todos
-  ['marca','linha','tipo'].forEach(function(c) {
-    document.getElementById('ms-' + c + '-dd').classList.remove('open');
+  ['marca','linha','tipo','codigo','produto'].forEach(function(c) {
+    var dd=document.getElementById('ms-' + c + '-dd'); if(dd) dd.classList.remove('open');
   });
   if (!isOpen) dd.classList.add('open');
 }
@@ -547,12 +576,34 @@ function msTog(campo) {
 // Fechar ao clicar fora
 document.addEventListener('click', function(e) {
   if (!e.target.closest('.ms-wrap')) {
-    ['marca','linha','tipo'].forEach(function(c) {
+    ['marca','linha','tipo','codigo','produto'].forEach(function(c) {
       var dd = document.getElementById('ms-' + c + '-dd');
       if (dd) dd.classList.remove('open');
     });
   }
 });
+
+function msPopularComBusca(campo, opcoes, labelFn) {
+  var dd = document.getElementById("ms-" + campo + "-dd");
+  if (!dd) return;
+  function render(filtro) {
+    var f = filtro.toLowerCase();
+    var itens = filtro ? opcoes.filter(function(o){ return (labelFn?labelFn(o):o).toLowerCase().indexOf(f)>=0; }) : opcoes;
+    var out = itens.map(function(o) {
+      var lbl = labelFn ? labelFn(o) : o;
+      var id = "ms-" + campo + "-" + o.replace(/[^a-zA-Z0-9]/g,"_");
+      var chk = MS[campo][o] ? " checked" : "";
+      return '<div class="ms-opt"><input type="checkbox" id="'+id+'" value="'+o+'"'+chk+' onchange="msChange(\'"'+campo+'"\')">'+
+             '<label for="'+id+'">'+lbl+'</label></div>';
+    }).join("");
+    var existing = dd.querySelector(".ms-items");
+    if (existing) existing.innerHTML = out;
+  }
+  dd.innerHTML = '<input type="text" class="ms-search" placeholder="Buscar..." oninput="(function(el){var w=el.closest(\'.ms-dd\');if(w){var fn=w._renderFn;if(fn)fn(el.value);}})(this)">'
+    + '<div class="ms-items"></div>';
+  dd._renderFn = render;
+  render("");
+}
 
 function msPopular(campo, opcoes, grupos) {
   var dd = document.getElementById('ms-' + campo + '-dd');
@@ -605,7 +656,7 @@ function msAtualizarLabel(campo) {
 }
 
 function msLimpar() {
-  ['marca','linha','tipo'].forEach(function(c) {
+  ['marca','linha','tipo','codigo','produto'].forEach(function(c) {
     MS[c] = {};
     msAtualizarLabel(c);
   });
