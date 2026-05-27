@@ -163,7 +163,7 @@
     <label>Linha<select id="f-linha" onchange="aplicarFiltros()"><option value="">Todas</option></select></label>
     <label>Tipo<select id="f-tipo" onchange="aplicarFiltros()"><option value="">Todos</option></select></label>
     <label style="flex-direction:row;align-items:center;gap:8px;height:34px;margin-top:18px;justify-content:flex-end">
-      <span style="font-size:12px;font-weight:500;color:var(--cinza-texto)">  Mostrar Sachês?  </span>
+      <span style="font-size:12px;font-weight:500;color:var(--cinza-texto)">Mostrar Sachê</span>
       <div class="toggle-wrap" onclick="toggleSache()" id="toggle-sache"><div class="toggle-thumb"></div></div>
     </label>
   </div>
@@ -401,7 +401,7 @@ function selecionarLinha(tr,codigo,descCod,e){
 }
 
 function atualizarGraficoTotal(){
-  document.getElementById('graf-titulo').textContent='Histórico de Vendas';
+  document.getElementById('graf-titulo').textContent='Vendas Diárias — Total dos filtrados';
   var codigos=dadosFiltrados.map(function(r){return r['Código'];}).filter(Boolean);
   if(!codigos.length){
     document.getElementById('graf-sub').textContent='Nenhum produto nos filtros atuais';
@@ -505,8 +505,7 @@ function carregarDados(){
   ]).then(function(res){
     var dados=res[0],diarias=res[1];
     dadosOriginais=dados;popularFiltros(dadosOriginais);
-    dadosFiltrados=dadosOriginais.slice();paginaAtual=1;
-    renderKPIs(dadosFiltrados);renderTabela();
+    paginaAtual=1;aplicarFiltros();
     var totalUnd=0,totalVal=0;
     diarias.forEach(function(d){totalUnd+=n(d['Quantidade']);totalVal+=n(d['Valor']||0);});
     document.getElementById('k-vendida').textContent=Math.round(totalUnd).toLocaleString('pt-BR');
