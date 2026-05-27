@@ -95,23 +95,6 @@
   .lb-fechar:hover { background:rgba(0,0,0,.7); }
   .estado { text-align:center; padding:3rem 1rem; color:var(--cinza-texto); font-size:14px; }
   .estado.erro { color:#c0392b; }
-  .toggle-wrap { width:40px; height:22px; background:var(--cinza-borda); border-radius:11px; cursor:pointer; position:relative; transition:background .2s; flex-shrink:0; }
-  .toggle-wrap.ativo { background:var(--verde); }
-  .toggle-thumb { width:16px; height:16px; background:var(--branco); border-radius:50%; position:absolute; top:3px; left:3px; transition:left .2s; box-shadow:0 1px 3px rgba(0,0,0,.2); }
-  .toggle-wrap.ativo .toggle-thumb { left:21px; }
-  .ms-wrap { position:relative; min-width:140px; }
-  .ms-btn { font-size:13px; padding:6px 10px; border:1px solid var(--cinza-borda); border-radius:6px; color:var(--texto); background:var(--branco); height:34px; cursor:pointer; width:100%; text-align:left; display:flex; align-items:center; justify-content:space-between; gap:4px; }
-  .ms-btn:focus { outline:none; border-color:var(--verde); }
-  .ms-btn-label { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:13px; }
-  .ms-btn-arrow { font-size:9px; flex-shrink:0; color:var(--cinza-texto); }
-  .ms-dropdown { display:none; position:absolute; top:calc(100% + 4px); left:0; min-width:100%; max-width:260px; background:var(--branco); border:1px solid var(--cinza-borda); border-radius:8px; box-shadow:0 4px 16px rgba(0,0,0,.12); z-index:500; max-height:240px; overflow-y:auto; }
-  .ms-dropdown.aberto { display:block; }
-  .ms-item { display:flex; align-items:center; gap:8px; padding:7px 12px; cursor:pointer; font-size:13px; }
-  .ms-item:hover { background:var(--verde-claro); }
-  .ms-item input[type=checkbox] { accent-color:var(--verde); width:14px; height:14px; flex-shrink:0; cursor:pointer; }
-  .ms-item label { cursor:pointer; flex:1; }
-  .ms-sep { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.8px; color:var(--cinza-texto); padding:6px 12px 2px; border-top:1px solid var(--cinza-borda); margin-top:2px; }
-  .ms-sep:first-child { border-top:none; margin-top:0; }
   @media print {
     @page { size:A4 landscape; margin:12mm; }
     body { background:white; }
@@ -172,37 +155,9 @@
 
   <div class="filtros-card">
     <label>Buscar<input type="text" id="f-busca" placeholder="Código ou descrição..." oninput="aplicarFiltros()"></label>
-    <label>Marca
-      <div class="ms-wrap" id="ms-marca-wrap">
-        <button type="button" class="ms-btn" onclick="msToggle('marca')">
-          <span class="ms-btn-label" id="ms-marca-label">Todas</span>
-          <span class="ms-btn-arrow">&#9660;</span>
-        </button>
-        <div class="ms-dropdown" id="ms-marca-dd"></div>
-      </div>
-    </label>
-    <label>Linha
-      <div class="ms-wrap" id="ms-linha-wrap">
-        <button type="button" class="ms-btn" onclick="msToggle('linha')">
-          <span class="ms-btn-label" id="ms-linha-label">Todas</span>
-          <span class="ms-btn-arrow">&#9660;</span>
-        </button>
-        <div class="ms-dropdown" id="ms-linha-dd"></div>
-      </div>
-    </label>
-    <label>Tipo
-      <div class="ms-wrap" id="ms-tipo-wrap">
-        <button type="button" class="ms-btn" onclick="msToggle('tipo')">
-          <span class="ms-btn-label" id="ms-tipo-label">Todos</span>
-          <span class="ms-btn-arrow">&#9660;</span>
-        </button>
-        <div class="ms-dropdown" id="ms-tipo-dd"></div>
-      </div>
-    </label>
-    <label style="flex-direction:row;align-items:center;gap:8px;height:34px;margin-top:18px;justify-content:flex-end">
-      <span style="font-size:12px;font-weight:500;color:var(--cinza-texto)">Mostrar Sachê</span>
-      <div class="toggle-wrap" onclick="toggleSache()" id="toggle-sache"><div class="toggle-thumb"></div></div>
-    </label>
+    <label>Marca<select id="f-marca" onchange="aplicarFiltros()"><option value="">Todas</option></select></label>
+    <label>Linha<select id="f-linha" onchange="aplicarFiltros()"><option value="">Todas</option></select></label>
+    <label>Tipo<select id="f-tipo" onchange="aplicarFiltros()"><option value="">Todos</option></select></label>
   </div>
 
   <div class="grafico-card">
@@ -213,7 +168,7 @@
       </div>
     </div>
     <div style="position:relative;height:200px" id="graf-wrap">
-      <div class="grafico-placeholder">Carregando histórico de vendas...</div>
+      <div class="grafico-placeholder">Selecione um produto clicando em uma linha da tabela</div>
     </div>
   </div>
 
@@ -273,16 +228,15 @@ function custoUnitario(cod){return CUSTOS[cod]||CUSTOS[String(parseInt(cod))]||0
 function custoTotal(r){return n(r['Estoque Dispon\u00edvel'])*custoUnitario(r['C\u00f3digo']);}
 
 function popularFiltros(dados){
-  var marcas=[],linhas=[],tipos=[];
-  dados.forEach(function(r){
-    if(r['Marca']&&marcas.indexOf(r['Marca'])===-1) marcas.push(r['Marca']);
-    if(r['Linha']&&linhas.indexOf(r['Linha'])===-1) linhas.push(r['Linha']);
-    if(r['Tipo']&&tipos.indexOf(r['Tipo'])===-1) tipos.push(r['Tipo']);
+  ['marca','linha','tipo'].forEach(function(campo){
+    var sel=document.getElementById('f-'+campo),val=sel.value;
+    var key=campo.charAt(0).toUpperCase()+campo.slice(1),opts=[];
+    dados.forEach(function(r){if(r[key]&&opts.indexOf(r[key])===-1)opts.push(r[key]);});
+    opts.sort();
+    sel.innerHTML='<option value="">'+(campo==='tipo'?'Todos':'Todas')+'</option>'+
+      opts.map(function(o){return'<option value="'+o+'">'+o+'</option>';}).join('');
+    if(val)sel.value=val;
   });
-  marcas.sort(); linhas.sort(); tipos.sort();
-  msPopular('marca', marcas, null);
-  msPopular('linha', linhas, null);
-  msPopular('tipo', tipos, GRUPOS_TIPO);
 }
 
 
@@ -360,33 +314,17 @@ function irPara(p){var t=Math.ceil(dadosFiltrados.length/POR_PAGINA);if(p<1||p>t
 
 function aplicarFiltros(){
   var b=document.getElementById('f-busca').value.toLowerCase();
-  var selMarca=Object.keys(msSelecoes['marca']);
-  var selLinha=Object.keys(msSelecoes['linha']);
-  var selTipo=Object.keys(msSelecoes['tipo']);
+  var marca=document.getElementById('f-marca').value,linha=document.getElementById('f-linha').value,tipo=document.getElementById('f-tipo').value;
   dadosFiltrados=dadosOriginais.filter(function(r){
-    var tipo=r['Tipo']||'';
-    if(!sacheAtivo && GRUPOS_TIPO['Sach\u00eas'] && GRUPOS_TIPO['Sach\u00eas'].indexOf(tipo)>=0) return false;
-    return(!b||(r['C\u00f3digo']||'').toLowerCase().indexOf(b)>=0||(r['Descri\u00e7\u00e3o']||'').toLowerCase().indexOf(b)>=0)
-      &&(selMarca.length===0||selMarca.indexOf(r['Marca'])>=0)
-      &&(selLinha.length===0||selLinha.indexOf(r['Linha'])>=0)
-      &&(selTipo.length===0||selTipo.indexOf(tipo)>=0);
+    return(!b||(r['Código']||'').toLowerCase().indexOf(b)>=0||(r['Descrição']||'').toLowerCase().indexOf(b)>=0)
+      &&(!marca||r['Marca']===marca)&&(!linha||r['Linha']===linha)&&(!tipo||r['Tipo']===tipo);
   });
-  paginaAtual=1; renderKPIs(dadosFiltrados); renderTabela();
-  if(!linhaSelecionada) atualizarGraficoTotal();
+  paginaAtual=1;renderKPIs(dadosFiltrados);renderTabela();
 }
 
 /* GRÁFICO */
-function selecionarLinha(tr, codigo, descCod, e){
+function selecionarLinha(tr,codigo,descCod,e){
   if(e.target.tagName==='IMG') return;
-  // Deselecionar se clicar no mesmo
-  if(linhaSelecionada===codigo){
-    linhaSelecionada=null;
-    document.querySelectorAll('tr.selecionado').forEach(function(el){el.classList.remove('selecionado');});
-    document.getElementById('graf-titulo').textContent='Vendas Di\u00e1rias \u2014 Total dos filtrados';
-    document.getElementById('graf-sub').textContent='Clique em um produto para ver seu hist\u00f3rico individual';
-    atualizarGraficoTotal();
-    return;
-  }
   linhaSelecionada=codigo;
   document.querySelectorAll('tr.selecionado').forEach(function(el){el.classList.remove('selecionado');});
   tr.classList.add('selecionado');
@@ -397,35 +335,16 @@ function selecionarLinha(tr, codigo, descCod, e){
   sbFetch('md_vendas_diarias','select=Data,Quantidade&C%C3%B3digo=eq.'+encodeURIComponent(codigo)+'&Data=gte.'+new Date().getFullYear()+'-01-01&order=Data.asc&limit=1000')
     .then(function(dados){
       document.getElementById('graf-sub').textContent='C\u00f3digo: '+codigo+' \u2022 '+dados.length+' dias com venda';
-      if(!dados||!dados.length){document.getElementById('graf-wrap').innerHTML='<div class="grafico-placeholder">Sem dados de venda para este produto.</div>';return;}
-      renderGrafico(dados,'Unidades/dia');
+      if(!dados||!dados.length){
+        document.getElementById('graf-wrap').innerHTML='<div class="grafico-placeholder">Sem dados de venda para este produto.</div>';
+        return;
+      }
+      renderGrafico(dados);
+      document.getElementById('graf-wrap').scrollIntoView({behavior:'smooth',block:'nearest'});
     })
-    .catch(function(err){document.getElementById('graf-wrap').innerHTML='<div class="grafico-placeholder estado erro">Erro: '+err.message+'</div>';});
-}
-
-function atualizarGraficoTotal(){
-  var codigos=dadosFiltrados.map(function(r){return r['C\u00f3digo'];}).filter(Boolean);
-  if(!codigos.length){
-    document.getElementById('graf-wrap').innerHTML='<div class="grafico-placeholder">Nenhum produto nos filtros atuais.</div>';
-    return;
-  }
-  document.getElementById('graf-titulo').textContent='Vendas Di\u00e1rias \u2014 Total dos filtrados ('+codigos.length+' produtos)';
-  document.getElementById('graf-sub').textContent='Carregando...';
-  document.getElementById('graf-wrap').innerHTML='<div class="grafico-placeholder">Carregando...</div>';
-  var inicioAno=new Date().getFullYear()+'-01-01';
-  var lote=codigos.slice(0,50);
-  var filtroIn=lote.map(function(c){return encodeURIComponent(c);}).join(',');
-  sbFetch('md_vendas_diarias','select=Data,Quantidade&C%C3%B3digo=in.('+filtroIn+')&Data=gte.'+inicioAno+'&order=Data.asc&limit=10000')
-    .then(function(dados){
-      var mapa={};
-      dados.forEach(function(d){var dt=d['Data'];mapa[dt]=(mapa[dt]||0)+n(d['Quantidade']);});
-      var datas=Object.keys(mapa).sort();
-      var agregado=datas.map(function(d){return{Data:d,Quantidade:mapa[d]};});
-      document.getElementById('graf-sub').textContent=datas.length+' dias com venda registrada';
-      if(!agregado.length){document.getElementById('graf-wrap').innerHTML='<div class="grafico-placeholder">Sem dados de venda para os produtos filtrados.</div>';return;}
-      renderGrafico(agregado,'Total unidades/dia');
-    })
-    .catch(function(err){document.getElementById('graf-wrap').innerHTML='<div class="grafico-placeholder estado erro">Erro: '+err.message+'</div>';});
+    .catch(function(err){
+      document.getElementById('graf-wrap').innerHTML='<div class="grafico-placeholder estado erro">Erro: '+err.message+'</div>';
+    });
 }
 
 function renderGrafico(dados){
@@ -484,78 +403,6 @@ function downloadCSV(){
   a.click();
 }
 
-var GRUPOS_TIPO = {
-  "Camisetas":  ["Baby Look","Camiseta"],
-  "Embalagens": ["Caixa de Presente","Saco de Papel","Sacola","Bolsa","Mala","Necessaire","Estojo","Tambor"],
-  "Impressos":  ["Cat\u00e1logo","Folder","Manual T\u00e9cnico","Filipeta","Cartucho"],
-  "Sinaliza\u00e7\u00e3o": ["Woobler","Clip Strip","Testeira","Faixa de G\u00f4ndola","Totem","Bandeira","Display","Placa"],
-  "Sach\u00eas": ["Sache"],
-  "Pl\u00e1sticos": ["Pl\u00e1sticos","Copo","Disco"],
-  "Controle":   ["Bloco de Controle de Guelta","Guelta","Cartela de Cores"],
-  "Acess\u00f3rios": ["Caneta","Avental","Toalha","Tecido"],
-  "Bal\u00e3o":      ["Balao"]
-};
-// Mapeia tipo original → grupo
-var TIPO_PARA_GRUPO = {};
-Object.keys(GRUPOS_TIPO).forEach(function(g){
-  GRUPOS_TIPO[g].forEach(function(t){ TIPO_PARA_GRUPO[t]=g; });
-});
-
-var msSelecoes = {marca:{}, linha:{}, tipo:{}};
-var sacheAtivo = false;
-
-function msToggle(campo){
-  var dd=document.getElementById("ms-"+campo+"-dd");
-  var aberto=dd.classList.contains("aberto");
-  document.querySelectorAll(".ms-dropdown.aberto").forEach(function(el){el.classList.remove("aberto");});
-  if(!aberto) dd.classList.add("aberto");
-}
-document.addEventListener("click",function(e){
-  if(!e.target.closest(".ms-wrap")) document.querySelectorAll(".ms-dropdown.aberto").forEach(function(el){el.classList.remove("aberto");});
-});
-
-function msPopular(campo, opcoes, grupos){
-  var dd=document.getElementById("ms-"+campo+"-dd");
-  var html="";
-  if(grupos){
-    Object.keys(grupos).forEach(function(g){
-      var tipos=grupos[g].filter(function(t){return opcoes.indexOf(t)>=0;});
-      if(!tipos.length) return;
-      html+='<div class="ms-sep">'+g+'</div>';
-      tipos.forEach(function(t){
-        var chk=msSelecoes[campo][t]?"checked":"";
-        html+='<div class="ms-item"><input type="checkbox" id="ms-'+campo+'-'+t.replace(/ /g,"_")+'" '+chk+' onchange="msChange(\'"+campo+"\')">'+
-             '<label for="ms-'+campo+'-'+t.replace(/ /g,"_")+"">"+t+"</label></div>";
-      });
-    });
-  } else {
-    opcoes.forEach(function(o){
-      var chk=msSelecoes[campo][o]?"checked":"";
-      html+='<div class="ms-item"><input type="checkbox" id="ms-'+campo+'-'+o.replace(/ /g,"_")+'" '+chk+' onchange="msChange(\'"+campo+"\')">'+
-           '<label for="ms-'+campo+'-'+o.replace(/ /g,"_")+"">"+o+"</label></div>";
-    });
-  }
-  dd.innerHTML=html;
-}
-
-function msChange(campo){
-  var dd=document.getElementById("ms-"+campo+"-dd");
-  var checks=dd.querySelectorAll("input[type=checkbox]");
-  msSelecoes[campo]={};
-  checks.forEach(function(c){if(c.checked) msSelecoes[campo][c.nextElementSibling.textContent]=true;});
-  var sel=Object.keys(msSelecoes[campo]);
-  var lbl=document.getElementById("ms-"+campo+"-label");
-  lbl.textContent=sel.length===0?(campo==="tipo"?"Todos":"Todas"):sel.length===1?sel[0]:sel.length+" selecionados";
-  aplicarFiltros();
-}
-
-function toggleSache(){
-  sacheAtivo=!sacheAtivo;
-  var el=document.getElementById("toggle-sache");
-  if(sacheAtivo) el.classList.add("ativo"); else el.classList.remove("ativo");
-  aplicarFiltros();
-}
-
 function carregarDados(){
   document.getElementById('update-time').textContent='Atualizando...';
   document.getElementById('tabela-container').innerHTML='<div class="estado">Carregando dados...</div>';
@@ -567,7 +414,7 @@ function carregarDados(){
     var dados=res[0],diarias=res[1];
     dadosOriginais=dados;popularFiltros(dadosOriginais);
     dadosFiltrados=dadosOriginais.slice();paginaAtual=1;
-    renderKPIs(dadosFiltrados);renderTabela();atualizarGraficoTotal();
+    renderKPIs(dadosFiltrados);renderTabela();
     var totalUnd=0,totalVal=0;
     diarias.forEach(function(d){totalUnd+=n(d['Quantidade']);totalVal+=n(d['Valor']||0);});
     document.getElementById('k-vendida').textContent=Math.round(totalUnd).toLocaleString('pt-BR');
