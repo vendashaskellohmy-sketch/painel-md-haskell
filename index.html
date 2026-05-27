@@ -495,7 +495,8 @@ function carregarDados(){
     document.getElementById('k-vendida').textContent=Math.round(totalUnd).toLocaleString('pt-BR');
     document.getElementById('k-valor').textContent='R$ '+totalVal.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
     var hoje=new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'});
-    document.getElementById('update-time').textContent='Dados de '+hoje+' • atualizado às 08h30';
+    document.getElementById('update-time').textContent='Dados de '+hoje+' • atualizado às 08h00';
+    atualizarGraficoTotal();
   }).catch(function(err){
     document.getElementById('tabela-container').innerHTML='<div class="estado erro">Não foi possível carregar.<br><small>'+err.message+'</small></div>';
     document.getElementById('update-time').textContent='Erro ao carregar';
