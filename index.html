@@ -222,10 +222,6 @@
       <span style="font-size:12px;font-weight:500;color:var(--cinza-texto)">   Mostrar Sachês? </span>
       <div class="toggle-wrap" onclick="toggleSache()" id="toggle-sache"><div class="toggle-thumb"></div></div>
     </label>
-    <label style="flex-direction:row;align-items:center;gap:8px;height:34px;margin-top:18px;justify-content:flex-end">
-      <span style="font-size:12px;font-weight:500;color:var(--cinza-texto)">Apenas em estoque</span>
-      <div class="toggle-wrap" onclick="toggleEstoque()" id="toggle-estoque"><div class="toggle-thumb"></div></div>
-    </label>
     <label style="flex-direction:row;align-items:flex-end;justify-content:flex-end;height:34px;margin-top:18px">
       <button onclick="limparFiltros()" style="background:none;border:1px solid var(--cinza-borda);border-radius:6px;padding:5px 14px;font-size:12px;cursor:pointer;color:var(--cinza-texto);height:34px;white-space:nowrap">&#x2715; Limpar filtros</button>
     </label>
@@ -246,7 +242,11 @@
   <div class="tabela-card">
     <div class="tabela-header">
       <span>Inventário de MDs</span>
-      <div style="display:flex;align-items:center;gap:8px">
+      <div style="display:flex;align-items:center;gap:12px">
+        <label style="flex-direction:row;align-items:center;gap:6px;font-size:12px;color:var(--cinza-texto);font-weight:500;cursor:pointer" onclick="toggleEstoque()">
+          Apenas em estoque
+          <div class="toggle-wrap" id="toggle-estoque"><div class="toggle-thumb"></div></div>
+        </label>
         <button onclick="downloadCSV()" style="background:none;border:1px solid var(--cinza-borda);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;color:var(--cinza-texto)">&#x2B07; CSV</button>
         <span class="tabela-count" id="tabela-count">— itens</span>
       </div>
