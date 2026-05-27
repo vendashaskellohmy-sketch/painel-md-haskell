@@ -222,6 +222,10 @@
       <span style="font-size:12px;font-weight:500;color:var(--cinza-texto)">   Mostrar Sachês? </span>
       <div class="toggle-wrap" onclick="toggleSache()" id="toggle-sache"><div class="toggle-thumb"></div></div>
     </label>
+    <label style="flex-direction:row;align-items:center;gap:8px;height:34px;margin-top:18px;justify-content:flex-end">
+      <span style="font-size:12px;font-weight:500;color:var(--cinza-texto)">Apenas em estoque</span>
+      <div class="toggle-wrap" onclick="toggleEstoque()" id="toggle-estoque"><div class="toggle-thumb"></div></div>
+    </label>
     <label style="flex-direction:row;align-items:flex-end;justify-content:flex-end;height:34px;margin-top:18px">
       <button onclick="limparFiltros()" style="background:none;border:1px solid var(--cinza-borda);border-radius:6px;padding:5px 14px;font-size:12px;cursor:pointer;color:var(--cinza-texto);height:34px;white-space:nowrap">&#x2715; Limpar filtros</button>
     </label>
@@ -413,6 +417,7 @@ function aplicarFiltros() {
   var selProduto = Object.keys(MS['produto']);
   dadosFiltrados = dadosOriginais.filter(function(r) {
     if (!sacheAtivo && (r['Tipo']||'').toLowerCase().indexOf('sach') >= 0) return false;
+    if (apenasEmEstoque && n(r['Estoque Disponível']) < 1) return false;
     return (!b || (r['Código']||'').toLowerCase().indexOf(b) >= 0 || (r['Descrição']||'').toLowerCase().indexOf(b) >= 0)
       && (selMarca.length   === 0 || selMarca.indexOf(r['Marca']) >= 0)
       && (selLinha.length   === 0 || selLinha.indexOf(r['Linha']) >= 0)
@@ -547,6 +552,13 @@ function downloadCSV(){
 }
 
 var sacheAtivo = false;
+var apenasEmEstoque = false;
+function toggleEstoque(){
+  apenasEmEstoque = !apenasEmEstoque;
+  var el = document.getElementById("toggle-estoque");
+  if(apenasEmEstoque) el.classList.add("ativo"); else el.classList.remove("ativo");
+  aplicarFiltros();
+}
 function toggleSache(){
   sacheAtivo = !sacheAtivo;
   var el = document.getElementById("toggle-sache");
