@@ -243,10 +243,10 @@
     <div class="tabela-header">
       <span>Inventário de MDs</span>
       <div style="display:flex;align-items:center;gap:12px">
-        <label style="flex-direction:row;align-items:center;gap:6px;font-size:12px;color:var(--cinza-texto);font-weight:500;cursor:pointer" onclick="toggleEstoque()">
-          Apenas em estoque
-          <div class="toggle-wrap" id="toggle-estoque"><div class="toggle-thumb"></div></div>
-        </label>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="font-size:12px;font-weight:500;color:var(--cinza-texto)">Apenas em estoque</span>
+          <div class="toggle-wrap" onclick="toggleEstoque()" id="toggle-estoque"><div class="toggle-thumb"></div></div>
+        </div>
         <button onclick="downloadCSV()" style="background:none;border:1px solid var(--cinza-borda);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;color:var(--cinza-texto)">&#x2B07; CSV</button>
         <span class="tabela-count" id="tabela-count">— itens</span>
       </div>
