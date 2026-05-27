@@ -145,7 +145,6 @@
   </div>
   <div class="header-btns">
     <button class="btn btn-pdf" onclick="gerarPDF()">&#x2935; PDF</button>
-    <button class="btn btn-atualizar" onclick="limparFiltros()">&#x2715; Limpar Filtros</button>
   </div>
 </header>
 
@@ -165,6 +164,9 @@
     <label style="flex-direction:row;align-items:center;gap:8px;height:34px;margin-top:18px;justify-content:flex-end">
       <span style="font-size:12px;font-weight:500;color:var(--cinza-texto)">   Mostrar Sachês? </span>
       <div class="toggle-wrap" onclick="toggleSache()" id="toggle-sache"><div class="toggle-thumb"></div></div>
+    </label>
+    <label style="flex-direction:row;align-items:flex-end;justify-content:flex-end;height:34px;margin-top:18px">
+      <button onclick="limparFiltros()" style="background:none;border:1px solid var(--cinza-borda);border-radius:6px;padding:5px 14px;font-size:12px;cursor:pointer;color:var(--cinza-texto);height:34px;white-space:nowrap">&#x2715; Limpar filtros</button>
     </label>
   </div>
 
