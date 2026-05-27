@@ -244,7 +244,7 @@ const CUSTOS = {"1011202": 7.19564, "5013013": 3.17862, "5011015": 3.63908, "101
 const SENHAS_VALIDAS = ['marciana','camacho','priscila','anderson','gustavo','rodrigo','kassya','josimar'];
 const POR_PAGINA = 50;
 
-let dadosOriginais=[], dadosFiltrados=[];
+let dadosOriginais=[], dadosFiltrados=[], dadosDiarios={};
 let paginaAtual=1, sortCol='Descri\u00e7\u00e3o', sortDir='asc';
 let linhaSelecionada=null, graficoAtivo=null;
 
@@ -301,10 +301,17 @@ function popularFiltros(dados) {
 
 
 function renderKPIs(dados){
-  var disp=0,custo=0;
-  dados.forEach(function(r){disp+=n(r['Estoque Disponível']);custo+=custoTotal(r);});
+  var disp=0,custo=0,vendida=0,valor=0;
+  dados.forEach(function(r){
+    disp+=n(r['Estoque Disponível']);
+    custo+=custoTotal(r);
+    var d=dadosDiarios[r['Código']]||{und:0,val:0};
+    vendida+=d.und; valor+=d.val;
+  });
   document.getElementById('k-disp').textContent=Math.round(disp).toLocaleString('pt-BR');
   document.getElementById('k-custo').textContent='R$ '+custo.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  document.getElementById('k-vendida').textContent=Math.round(vendida).toLocaleString('pt-BR');
+  document.getElementById('k-valor').textContent='R$ '+valor.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 }
 
 function ordenar(d){
@@ -611,15 +618,19 @@ function carregarDados(){
   var inicioAno=new Date().getFullYear()+'-01-01';
   Promise.all([
     sbFetch('md_painel','select=*&limit=10000'),
-    sbFetch('md_vendas_diarias','select=Quantidade,Valor&Data=gte.'+inicioAno+'&limit=100000')
+    sbFetch('md_vendas_diarias','select=C%C3%B3digo,Quantidade,Valor&Data=gte.'+inicioAno+'&limit=100000')
   ]).then(function(res){
     var dados=res[0],diarias=res[1];
+    // Indexar vendas diárias por Código
+    dadosDiarios={};
+    diarias.forEach(function(d){
+      var c=d['Código'];
+      if(!dadosDiarios[c]) dadosDiarios[c]={und:0,val:0};
+      dadosDiarios[c].und+=n(d['Quantidade']);
+      dadosDiarios[c].val+=n(d['Valor']||0);
+    });
     dadosOriginais=dados;popularFiltros(dadosOriginais);
     paginaAtual=1;aplicarFiltros();
-    var totalUnd=0,totalVal=0;
-    diarias.forEach(function(d){totalUnd+=n(d['Quantidade']);totalVal+=n(d['Valor']||0);});
-    document.getElementById('k-vendida').textContent=Math.round(totalUnd).toLocaleString('pt-BR');
-    document.getElementById('k-valor').textContent='R$ '+totalVal.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
     var hoje=new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'});
     document.getElementById('update-time').textContent='Dados de '+hoje+' • atualizado às 08h30';
     atualizarGraficoTotal();
