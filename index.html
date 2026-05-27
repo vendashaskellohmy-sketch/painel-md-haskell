@@ -114,6 +114,19 @@
     tr { page-break-inside:avoid; }
     .prod-img { width:32px; height:32px; }
   }
+
+  .ms-wrap { position:relative; }
+  .ms-btn { font-size:13px; padding:6px 10px; border:1px solid var(--cinza-borda); border-radius:6px; color:var(--texto); background:var(--branco); height:34px; cursor:pointer; width:100%; text-align:left; display:flex; align-items:center; justify-content:space-between; gap:4px; min-width:140px; }
+  .ms-btn:focus { outline:none; border-color:var(--verde); }
+  .ms-label { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:13px; flex:1; }
+  .ms-arrow { font-size:9px; color:var(--cinza-texto); flex-shrink:0; }
+  .ms-dd { display:none; position:absolute; top:calc(100% + 4px); left:0; min-width:100%; max-width:280px; background:var(--branco); border:1px solid var(--cinza-borda); border-radius:8px; box-shadow:0 4px 16px rgba(0,0,0,.12); z-index:500; max-height:220px; overflow-y:auto; }
+  .ms-dd.open { display:block; }
+  .ms-opt { display:flex; align-items:center; gap:8px; padding:7px 12px; cursor:pointer; font-size:13px; }
+  .ms-opt:hover { background:var(--verde-claro); }
+  .ms-opt input { accent-color:var(--verde); width:14px; height:14px; flex-shrink:0; cursor:pointer; }
+  .ms-opt label { cursor:pointer; flex:1; margin:0; font-weight:400; }
+  .ms-grp { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.8px; color:var(--cinza-texto); padding:6px 12px 2px; background:var(--cinza-bg); }
 </style>
 </head>
 <body>
@@ -158,9 +171,33 @@
 
   <div class="filtros-card">
     <label>Buscar<input type="text" id="f-busca" placeholder="Código ou descrição..." oninput="aplicarFiltros()"></label>
-    <label>Marca<select id="f-marca" onchange="aplicarFiltros()"><option value="">Todas</option></select></label>
-    <label>Linha<select id="f-linha" onchange="aplicarFiltros()"><option value="">Todas</option></select></label>
-    <label>Tipo<select id="f-tipo" onchange="aplicarFiltros()"><option value="">Todos</option></select></label>
+    <label>Marca
+      <div class="ms-wrap">
+        <button type="button" class="ms-btn" id="ms-marca-btn" onclick="msTog('marca')">
+          <span class="ms-label" id="ms-marca-lbl">Todas</span>
+          <span class="ms-arrow">&#9660;</span>
+        </button>
+        <div class="ms-dd" id="ms-marca-dd"></div>
+      </div>
+    </label>
+    <label>Linha
+      <div class="ms-wrap">
+        <button type="button" class="ms-btn" id="ms-linha-btn" onclick="msTog('linha')">
+          <span class="ms-label" id="ms-linha-lbl">Todas</span>
+          <span class="ms-arrow">&#9660;</span>
+        </button>
+        <div class="ms-dd" id="ms-linha-dd"></div>
+      </div>
+    </label>
+    <label>Tipo
+      <div class="ms-wrap">
+        <button type="button" class="ms-btn" id="ms-tipo-btn" onclick="msTog('tipo')">
+          <span class="ms-label" id="ms-tipo-lbl">Todos</span>
+          <span class="ms-arrow">&#9660;</span>
+        </button>
+        <div class="ms-dd" id="ms-tipo-dd"></div>
+      </div>
+    </label>
     <label style="flex-direction:row;align-items:center;gap:8px;height:34px;margin-top:18px;justify-content:flex-end">
       <span style="font-size:12px;font-weight:500;color:var(--cinza-texto)">   Mostrar Sachês? </span>
       <div class="toggle-wrap" onclick="toggleSache()" id="toggle-sache"><div class="toggle-thumb"></div></div>
@@ -237,52 +274,28 @@ function n(v){return parseFloat((v||'0').toString().replace(',','.'))||0;}
 function custoUnitario(cod){return CUSTOS[cod]||CUSTOS[String(parseInt(cod))]||0;}
 function custoTotal(r){return n(r['Estoque Dispon\u00edvel'])*custoUnitario(r['C\u00f3digo']);}
 
-function popularFiltros(dados){
+function popularFiltros(dados) {
   var GRUPOS = {
-  "Camisetas":       ["Baby Look","Camiseta"],
-  "Embalagens":      ["Caixa de Presente","Saco de Papel","Sacola","Bolsa","Mala","Necessaire","Estojo","Tambor"],
-  "Impressos":       ["Cat\u00e1logo","Folder","Manual T\u00e9cnico","Filipeta","Cartucho"],
-  "Sinaliza\u00e7\u00e3o": ["Woobler","Clip Strip","Testeira","Faixa de G\u00f4ndola","Totem","Bandeira","Display","Placa"],
-  "Sach\u00eas":    ["Sache"],
-  "Pl\u00e1sticos": ["Pl\u00e1sticos","Copo","Disco"],
-  "Controle":        ["Bloco de Controle de Guelta","Guelta","Cartela de Cores"],
-  "Acess\u00f3rios":["Caneta","Avental","Toalha","Tecido"],
-  "Bal\u00e3o":     ["Balao"]
-};
-  // Tipos invertido: tipo → grupo
-  var tipoGrupo = {};
-  Object.keys(GRUPOS).forEach(function(g){
-    GRUPOS[g].forEach(function(t){ tipoGrupo[t] = g; });
+    "Camisetas":       ["Baby Look","Camiseta"],
+    "Embalagens":      ["Caixa de Presente","Saco de Papel","Sacola","Bolsa","Mala","Necessaire","Estojo","Tambor"],
+    "Impressos":       ["Catálogo","Folder","Manual Técnico","Filipeta","Cartucho"],
+    "Sinalização": ["Woobler","Clip Strip","Testeira","Faixa de Gôndola","Totem","Bandeira","Display","Placa"],
+    "Sachês":    ["Sache"],
+    "Plásticos": ["Plásticos","Copo","Disco"],
+    "Controle":        ["Bloco de Controle de Guelta","Guelta","Cartela de Cores"],
+    "Acessórios": ["Caneta","Avental","Toalha","Tecido"],
+    "Balão":     ["Balao"]
+  };
+  var marcas = [], linhas = [], tipos = [];
+  dados.forEach(function(r) {
+    if (r['Marca'] && marcas.indexOf(r['Marca']) === -1) marcas.push(r['Marca']);
+    if (r['Linha'] && linhas.indexOf(r['Linha']) === -1) linhas.push(r['Linha']);
+    if (r['Tipo']  && tipos.indexOf(r['Tipo'])   === -1) tipos.push(r['Tipo']);
   });
-
-  // Marca
-  var selMarca = document.getElementById('f-marca'), valMarca = selMarca.value, opts = [];
-  dados.forEach(function(r){ if(r['Marca'] && opts.indexOf(r['Marca'])===-1) opts.push(r['Marca']); });
-  opts.sort();
-  selMarca.innerHTML = '<option value="">Todas</option>' + opts.map(function(o){ return '<option value="'+o+'">'+o+'</option>'; }).join('');
-  if(valMarca) selMarca.value = valMarca;
-
-  // Linha
-  var selLinha = document.getElementById('f-linha'), valLinha = selLinha.value; opts = [];
-  dados.forEach(function(r){ if(r['Linha'] && opts.indexOf(r['Linha'])===-1) opts.push(r['Linha']); });
-  opts.sort();
-  selLinha.innerHTML = '<option value="">Todas</option>' + opts.map(function(o){ return '<option value="'+o+'">'+o+'</option>'; }).join('');
-  if(valLinha) selLinha.value = valLinha;
-
-  // Tipo — agrupado com optgroup
-  var selTipo = document.getElementById('f-tipo'), valTipo = selTipo.value;
-  var tiposPresentes = [];
-  dados.forEach(function(r){ if(r['Tipo'] && tiposPresentes.indexOf(r['Tipo'])===-1) tiposPresentes.push(r['Tipo']); });
-  var tipoHtml = '<option value="">Todos</option>';
-  Object.keys(GRUPOS).forEach(function(g){
-    var membros = GRUPOS[g].filter(function(t){ return tiposPresentes.indexOf(t) >= 0; });
-    if(!membros.length) return;
-    tipoHtml += '<optgroup label="'+g+'">';
-    membros.forEach(function(t){ tipoHtml += '<option value="'+t+'">'+t+'</option>'; });
-    tipoHtml += '</optgroup>';
-  });
-  selTipo.innerHTML = tipoHtml;
-  if(valTipo) selTipo.value = valTipo;
+  marcas.sort(); linhas.sort(); tipos.sort();
+  msPopular('marca', marcas, null);
+  msPopular('linha', linhas, null);
+  msPopular('tipo',  tipos,  GRUPOS);
 }
 
 
@@ -358,16 +371,20 @@ function renderTabela(tudo){
 function pagRange(a,t){if(t<=7){var r=[];for(var i=1;i<=t;i++)r.push(i);return r;}if(a<=4)return[1,2,3,4,5,'...',t];if(a>=t-3)return[1,'...',t-4,t-3,t-2,t-1,t];return[1,'...',a-1,a,a+1,'...',t];}
 function irPara(p){var t=Math.ceil(dadosFiltrados.length/POR_PAGINA);if(p<1||p>t)return;paginaAtual=p;renderTabela();window.scrollTo({top:0,behavior:'smooth'});}
 
-function aplicarFiltros(){
-  var b=document.getElementById('f-busca').value.toLowerCase();
-  var marca=document.getElementById('f-marca').value,linha=document.getElementById('f-linha').value,tipo=document.getElementById('f-tipo').value;
-  dadosFiltrados=dadosOriginais.filter(function(r){
-    if(!sacheAtivo && (r['Tipo']||'').toLowerCase().indexOf('sach') >= 0) return false;
-    return(!b||(r['Código']||'').toLowerCase().indexOf(b)>=0||(r['Descrição']||'').toLowerCase().indexOf(b)>=0)
-      &&(!marca||r['Marca']===marca)&&(!linha||r['Linha']===linha)&&(!tipo||r['Tipo']===tipo);
+function aplicarFiltros() {
+  var b = document.getElementById('f-busca').value.toLowerCase();
+  var selMarca = Object.keys(MS['marca']);
+  var selLinha = Object.keys(MS['linha']);
+  var selTipo  = Object.keys(MS['tipo']);
+  dadosFiltrados = dadosOriginais.filter(function(r) {
+    if (!sacheAtivo && (r['Tipo']||'').toLowerCase().indexOf('sach') >= 0) return false;
+    return (!b || (r['Código']||'').toLowerCase().indexOf(b) >= 0 || (r['Descrição']||'').toLowerCase().indexOf(b) >= 0)
+      && (selMarca.length === 0 || selMarca.indexOf(r['Marca']) >= 0)
+      && (selLinha.length === 0 || selLinha.indexOf(r['Linha']) >= 0)
+      && (selTipo.length  === 0 || selTipo.indexOf(r['Tipo'])  >= 0);
   });
-  paginaAtual=1;renderKPIs(dadosFiltrados);renderTabela();
-  if(!linhaSelecionada) atualizarGraficoTotal();
+  paginaAtual = 1; renderKPIs(dadosFiltrados); renderTabela();
+  if (!linhaSelecionada) atualizarGraficoTotal();
 }
 
 /* GRÁFICO */
@@ -500,13 +517,93 @@ function toggleSache(){
   aplicarFiltros();
 }
 
-function limparFiltros(){
-  document.getElementById('f-busca').value='';
-  document.getElementById('f-marca').value='';
-  document.getElementById('f-linha').value='';
-  document.getElementById('f-tipo').value='';
+function limparFiltros() {
+  document.getElementById('f-busca').value = '';
+  msLimpar();
   aplicarFiltros();
 }
+
+
+/* ── MULTI-SELEÇÃO ──────────────────────────────────────────── */
+var MS = { marca: {}, linha: {}, tipo: {} };
+
+function msTog(campo) {
+  var dd = document.getElementById('ms-' + campo + '-dd');
+  var isOpen = dd.classList.contains('open');
+  // Fechar todos
+  ['marca','linha','tipo'].forEach(function(c) {
+    document.getElementById('ms-' + c + '-dd').classList.remove('open');
+  });
+  if (!isOpen) dd.classList.add('open');
+}
+
+// Fechar ao clicar fora
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.ms-wrap')) {
+    ['marca','linha','tipo'].forEach(function(c) {
+      var dd = document.getElementById('ms-' + c + '-dd');
+      if (dd) dd.classList.remove('open');
+    });
+  }
+});
+
+function msPopular(campo, opcoes, grupos) {
+  var dd = document.getElementById('ms-' + campo + '-dd');
+  if (!dd) return;
+  var out = '';
+  if (grupos) {
+    Object.keys(grupos).forEach(function(g) {
+      var membros = grupos[g].filter(function(t) { return opcoes.indexOf(t) >= 0; });
+      if (!membros.length) return;
+      out += '<div class="ms-grp">' + g + '</div>';
+      membros.forEach(function(o) {
+        var id = 'ms-' + campo + '-' + o.replace(/[^a-zA-Z0-9]/g, '_');
+        var chk = MS[campo][o] ? ' checked' : '';
+        out += '<div class="ms-opt">'
+             + '<input type="checkbox" id="' + id + '" value="' + o + '"' + chk + ' onchange="msChange(\'' + campo + '\')">'
+             + '<label for="' + id + '">' + o + '</label>'
+             + '</div>';
+      });
+    });
+  } else {
+    opcoes.forEach(function(o) {
+      var id = 'ms-' + campo + '-' + o.replace(/[^a-zA-Z0-9]/g, '_');
+      var chk = MS[campo][o] ? ' checked' : '';
+      out += '<div class="ms-opt">'
+           + '<input type="checkbox" id="' + id + '" value="' + o + '"' + chk + ' onchange="msChange(\'' + campo + '\')">'
+           + '<label for="' + id + '">' + o + '</label>'
+           + '</div>';
+    });
+  }
+  dd.innerHTML = out;
+}
+
+function msChange(campo) {
+  var dd = document.getElementById('ms-' + campo + '-dd');
+  MS[campo] = {};
+  dd.querySelectorAll('input[type=checkbox]:checked').forEach(function(c) {
+    MS[campo][c.value] = true;
+  });
+  msAtualizarLabel(campo);
+  aplicarFiltros();
+}
+
+function msAtualizarLabel(campo) {
+  var sel = Object.keys(MS[campo]);
+  var lbl = document.getElementById('ms-' + campo + '-lbl');
+  if (!lbl) return;
+  if (sel.length === 0) lbl.textContent = campo === 'tipo' ? 'Todos' : 'Todas';
+  else if (sel.length === 1) lbl.textContent = sel[0];
+  else lbl.textContent = sel.length + ' selecionados';
+}
+
+function msLimpar() {
+  ['marca','linha','tipo'].forEach(function(c) {
+    MS[c] = {};
+    msAtualizarLabel(c);
+  });
+}
+/* ── FIM MULTI-SELEÇÃO ──────────────────────────────────────── */
 
 function carregarDados(){
   document.getElementById('update-time').textContent='Atualizando...';
