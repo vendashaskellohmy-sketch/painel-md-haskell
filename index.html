@@ -228,15 +228,51 @@ function custoUnitario(cod){return CUSTOS[cod]||CUSTOS[String(parseInt(cod))]||0
 function custoTotal(r){return n(r['Estoque Dispon\u00edvel'])*custoUnitario(r['C\u00f3digo']);}
 
 function popularFiltros(dados){
-  ['marca','linha','tipo'].forEach(function(campo){
-    var sel=document.getElementById('f-'+campo),val=sel.value;
-    var key=campo.charAt(0).toUpperCase()+campo.slice(1),opts=[];
-    dados.forEach(function(r){if(r[key]&&opts.indexOf(r[key])===-1)opts.push(r[key]);});
-    opts.sort();
-    sel.innerHTML='<option value="">'+(campo==='tipo'?'Todos':'Todas')+'</option>'+
-      opts.map(function(o){return'<option value="'+o+'">'+o+'</option>';}).join('');
-    if(val)sel.value=val;
+  var GRUPOS = {
+  "Camisetas":       ["Baby Look","Camiseta"],
+  "Embalagens":      ["Caixa de Presente","Saco de Papel","Sacola","Bolsa","Mala","Necessaire","Estojo","Tambor"],
+  "Impressos":       ["Cat\u00e1logo","Folder","Manual T\u00e9cnico","Filipeta","Cartucho"],
+  "Sinaliza\u00e7\u00e3o": ["Woobler","Clip Strip","Testeira","Faixa de G\u00f4ndola","Totem","Bandeira","Display","Placa"],
+  "Sach\u00eas":    ["Sache"],
+  "Pl\u00e1sticos": ["Pl\u00e1sticos","Copo","Disco"],
+  "Controle":        ["Bloco de Controle de Guelta","Guelta","Cartela de Cores"],
+  "Acess\u00f3rios":["Caneta","Avental","Toalha","Tecido"],
+  "Bal\u00e3o":     ["Balao"]
+};
+  // Tipos invertido: tipo → grupo
+  var tipoGrupo = {};
+  Object.keys(GRUPOS).forEach(function(g){
+    GRUPOS[g].forEach(function(t){ tipoGrupo[t] = g; });
   });
+
+  // Marca
+  var selMarca = document.getElementById('f-marca'), valMarca = selMarca.value, opts = [];
+  dados.forEach(function(r){ if(r['Marca'] && opts.indexOf(r['Marca'])===-1) opts.push(r['Marca']); });
+  opts.sort();
+  selMarca.innerHTML = '<option value="">Todas</option>' + opts.map(function(o){ return '<option value="'+o+'">'+o+'</option>'; }).join('');
+  if(valMarca) selMarca.value = valMarca;
+
+  // Linha
+  var selLinha = document.getElementById('f-linha'), valLinha = selLinha.value; opts = [];
+  dados.forEach(function(r){ if(r['Linha'] && opts.indexOf(r['Linha'])===-1) opts.push(r['Linha']); });
+  opts.sort();
+  selLinha.innerHTML = '<option value="">Todas</option>' + opts.map(function(o){ return '<option value="'+o+'">'+o+'</option>'; }).join('');
+  if(valLinha) selLinha.value = valLinha;
+
+  // Tipo — agrupado com optgroup
+  var selTipo = document.getElementById('f-tipo'), valTipo = selTipo.value;
+  var tiposPresentes = [];
+  dados.forEach(function(r){ if(r['Tipo'] && tiposPresentes.indexOf(r['Tipo'])===-1) tiposPresentes.push(r['Tipo']); });
+  var tipoHtml = '<option value="">Todos</option>';
+  Object.keys(GRUPOS).forEach(function(g){
+    var membros = GRUPOS[g].filter(function(t){ return tiposPresentes.indexOf(t) >= 0; });
+    if(!membros.length) return;
+    tipoHtml += '<optgroup label="'+g+'">';
+    membros.forEach(function(t){ tipoHtml += '<option value="'+t+'">'+t+'</option>'; });
+    tipoHtml += '</optgroup>';
+  });
+  selTipo.innerHTML = tipoHtml;
+  if(valTipo) selTipo.value = valTipo;
 }
 
 
