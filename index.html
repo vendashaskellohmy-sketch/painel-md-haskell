@@ -145,7 +145,7 @@
   </div>
   <div class="header-btns">
     <button class="btn btn-pdf" onclick="gerarPDF()">&#x2935; PDF</button>
-    <button class="btn btn-atualizar" onclick="carregarDados()">&#x21BB; Atualizar</button>
+    <button class="btn btn-atualizar" onclick="limparFiltros()">&#x2715; Limpar Filtros</button>
   </div>
 </header>
 
@@ -434,7 +434,10 @@ function atualizarGraficoTotal(){
 function renderGrafico(dados){
   var wrap=document.getElementById('graf-wrap');
   wrap.innerHTML='<canvas id="graf-canvas"></canvas>';
-  var labels=dados.map(function(d){return d['Data'];});
+  var labels=dados.map(function(d){
+    var p=d['Data'].split('-');
+    return p[2]+'/'+p[1]+'/'+p[0];
+  });
   var qtds=dados.map(function(d){return n(d['Quantidade']);});
   if(graficoAtivo){graficoAtivo.destroy();graficoAtivo=null;}
   graficoAtivo=new Chart(document.getElementById('graf-canvas'),{
@@ -492,6 +495,14 @@ function toggleSache(){
   sacheAtivo = !sacheAtivo;
   var el = document.getElementById("toggle-sache");
   if(sacheAtivo) el.classList.add("ativo"); else el.classList.remove("ativo");
+  aplicarFiltros();
+}
+
+function limparFiltros(){
+  document.getElementById('f-busca').value='';
+  document.getElementById('f-marca').value='';
+  document.getElementById('f-linha').value='';
+  document.getElementById('f-tipo').value='';
   aplicarFiltros();
 }
 
