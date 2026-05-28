@@ -626,12 +626,21 @@ function msToggleGrupo(campo, membros) {
   membros.forEach(function(o){
     if(todosChecked) delete MS[campo][o];
     else MS[campo][o] = true;
+    // Atualizar checkbox visualmente
+    var id = 'ms-' + campo + '-' + o.replace(/[^a-zA-Z0-9]/g, '_');
+    var cb = document.getElementById(id);
+    if(cb) cb.checked = !todosChecked;
   });
-  msAtualizarLabel(campo);
-  msPopular(campo, Object.keys(MS[campo]).length ? null : null, null);
-  // Re-renderizar dropdown
+  // Atualizar texto do botão do grupo
   var dd = document.getElementById('ms-' + campo + '-dd');
-  if(dd && dd._lastOpcoes) msPopular(campo, dd._lastOpcoes, dd._lastGrupos);
+  if(dd) {
+    dd.querySelectorAll('button[data-grupo]').forEach(function(btn){
+      var g = btn.getAttribute('data-grupo');
+      var mbs = JSON.parse(btn.getAttribute('data-membros'));
+      btn.textContent = msGrupoTodosChecked(campo, mbs) ? 'Desmarcar' : 'Selecionar';
+    });
+  }
+  msAtualizarLabel(campo);
   aplicarFiltros();
 }
 
@@ -651,7 +660,8 @@ function msPopular(campo, opcoes, grupos) {
       var membrosJson = JSON.stringify(membros).replace(/'/g,"\\'");
       out += '<div class="ms-grp" style="display:flex;align-items:center;justify-content:space-between">'
            + '<span>' + g + '</span>'
-           + '<button onclick="msToggleGrupo(\''+ campo +'\',' + membrosJson + ');event.stopPropagation()" '
+           + '<button data-grupo="' + g + '" data-membros=\'' + membrosJson + '\' '
+           + 'onclick="msToggleGrupo(\''+ campo +'\',JSON.parse(this.getAttribute(\'data-membros\')));event.stopPropagation()" '
            + 'style="font-size:10px;padding:1px 6px;border:1px solid var(--cinza-borda);border-radius:4px;background:var(--branco);cursor:pointer;color:var(--cinza-texto)">' + btnLabel + '</button>'
            + '</div>';
       membros.forEach(function(o) {
