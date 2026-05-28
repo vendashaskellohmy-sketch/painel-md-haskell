@@ -462,7 +462,7 @@ function selecionarLinha(tr,codigo,descCod,e){
 }
 
 function atualizarGraficoTotal(){
-  document.getElementById('graf-titulo').textContent='Vendas Diárias — Total dos filtrados';
+  document.getElementById('graf-titulo').textContent='Vendas em 2026';
   var codigos=dadosFiltrados.map(function(r){return r['Código'];}).filter(Boolean);
   if(!codigos.length){
     document.getElementById('graf-sub').textContent='Nenhum produto nos filtros atuais';
