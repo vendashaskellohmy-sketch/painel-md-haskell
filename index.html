@@ -159,6 +159,10 @@
     <p id="update-time">Aguardando...</p>
   </div>
   <div class="header-btns">
+    <div style="display:flex;align-items:center;gap:6px">
+      <span style="font-size:12px;font-weight:500;color:rgba(255,255,255,.75)">Mostrar Sachês</span>
+      <div class="toggle-wrap" onclick="toggleSache()" id="toggle-sache"><div class="toggle-thumb"></div></div>
+    </div>
     <button class="btn btn-pdf" onclick="gerarPDF()">&#x2935; PDF</button>
   </div>
 </header>
@@ -218,10 +222,6 @@
         <div class="ms-dd" id="ms-produto-dd" style="max-height:260px"></div>
       </div>
     </label>
-    <label style="flex-direction:row;align-items:center;gap:8px;height:34px;margin-top:18px;justify-content:flex-end">
-      <span style="font-size:12px;font-weight:500;color:var(--cinza-texto)">   Mostrar Sachês? </span>
-      <div class="toggle-wrap" onclick="toggleSache()" id="toggle-sache"><div class="toggle-thumb"></div></div>
-    </label>
     <label style="flex-direction:row;align-items:flex-end;justify-content:flex-end;height:34px;margin-top:18px">
       <button onclick="limparFiltros()" style="background:none;border:1px solid var(--cinza-borda);border-radius:6px;padding:5px 14px;font-size:12px;cursor:pointer;color:var(--cinza-texto);height:34px;white-space:nowrap">&#x2715; Limpar filtros</button>
     </label>
@@ -243,12 +243,12 @@
     <div class="tabela-header">
       <span>Inventário de MDs</span>
       <div style="display:flex;align-items:center;gap:12px">
+        <span class="tabela-count" id="tabela-count">— itens</span>
         <div style="display:flex;align-items:center;gap:6px">
-          <span style="font-size:12px;font-weight:500;color:var(--cinza-texto)">Apenas em estoque</span>
+          <span style="font-size:12px;font-weight:500;color:var(--cinza-texto)">Apenas Estoque Disponível</span>
           <div class="toggle-wrap" onclick="toggleEstoque()" id="toggle-estoque"><div class="toggle-thumb"></div></div>
         </div>
         <button onclick="downloadCSV()" style="background:none;border:1px solid var(--cinza-borda);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;color:var(--cinza-texto)">&#x2B07; CSV</button>
-        <span class="tabela-count" id="tabela-count">— itens</span>
       </div>
     </div>
     <div class="tabela-scroll">
@@ -300,15 +300,15 @@ function custoTotal(r){return n(r['Estoque Dispon\u00edvel'])*custoUnitario(r['C
 
 function popularFiltros(dados) {
   var GRUPOS = {
+    "Acessórios": ["Avental","Caneta","Tecido","Toalha"],
+    "Balão":     ["Balao"],
     "Camisetas":       ["Baby Look","Camiseta"],
-    "Embalagens":      ["Caixa de Presente","Saco de Papel","Sacola","Bolsa","Mala","Necessaire","Estojo","Tambor"],
-    "Impressos":       ["Catálogo","Folder","Manual Técnico","Filipeta","Cartucho"],
-    "Sinalização": ["Woobler","Clip Strip","Testeira","Faixa de Gôndola","Totem","Bandeira","Display","Placa"],
+    "Controle":        ["Bloco de Controle de Guelta","Cartela de Cores","Guelta"],
+    "Embalagens":      ["Bolsa","Caixa de Presente","Estojo","Mala","Necessaire","Saco de Papel","Sacola","Tambor"],
+    "Impressos":       ["Cartucho","Catálogo","Filipeta","Folder","Manual Técnico"],
+    "Plásticos": ["Copo","Disco","Plásticos"],
     "Sachês":    ["Sache"],
-    "Plásticos": ["Plásticos","Copo","Disco"],
-    "Controle":        ["Bloco de Controle de Guelta","Guelta","Cartela de Cores"],
-    "Acessórios": ["Caneta","Avental","Toalha","Tecido"],
-    "Balão":     ["Balao"]
+    "Sinalização": ["Bandeira","Clip Strip","Display","Faixa de Gôndola","Placa","Testeira","Totem","Woobler"]
   };
   var marcas = [], linhas = [], tipos = [];
   dados.forEach(function(r) {
