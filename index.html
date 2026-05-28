@@ -243,11 +243,11 @@
     <div class="tabela-header">
       <span>Inventário de MDs</span>
       <div style="display:flex;align-items:center;gap:12px">
-        <span class="tabela-count" id="tabela-count">— itens</span>
         <div style="display:flex;align-items:center;gap:6px">
           <span style="font-size:12px;font-weight:500;color:var(--cinza-texto)">Apenas Estoque Disponível</span>
           <div class="toggle-wrap" onclick="toggleEstoque()" id="toggle-estoque"><div class="toggle-thumb"></div></div>
         </div>
+        <span class="tabela-count" id="tabela-count">— itens</span>
         <button onclick="downloadCSV()" style="background:none;border:1px solid var(--cinza-borda);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;color:var(--cinza-texto)">&#x2B07; CSV</button>
       </div>
     </div>
@@ -618,15 +618,42 @@ function msPopularComBusca(campo, opcoes, labelFn) {
   render("");
 }
 
+function msGrupoTodosChecked(campo, membros) {
+  return membros.every(function(o){ return !!MS[campo][o]; });
+}
+function msToggleGrupo(campo, membros) {
+  var todosChecked = msGrupoTodosChecked(campo, membros);
+  membros.forEach(function(o){
+    if(todosChecked) delete MS[campo][o];
+    else MS[campo][o] = true;
+  });
+  msAtualizarLabel(campo);
+  msPopular(campo, Object.keys(MS[campo]).length ? null : null, null);
+  // Re-renderizar dropdown
+  var dd = document.getElementById('ms-' + campo + '-dd');
+  if(dd && dd._lastOpcoes) msPopular(campo, dd._lastOpcoes, dd._lastGrupos);
+  aplicarFiltros();
+}
+
 function msPopular(campo, opcoes, grupos) {
   var dd = document.getElementById('ms-' + campo + '-dd');
   if (!dd) return;
+  // Guardar para re-render
+  if(opcoes) { dd._lastOpcoes = opcoes; dd._lastGrupos = grupos; }
+  else { opcoes = dd._lastOpcoes || []; grupos = dd._lastGrupos || null; }
   var out = '';
   if (grupos) {
     Object.keys(grupos).forEach(function(g) {
       var membros = grupos[g].filter(function(t) { return opcoes.indexOf(t) >= 0; });
       if (!membros.length) return;
-      out += '<div class="ms-grp">' + g + '</div>';
+      var todosOn = msGrupoTodosChecked(campo, membros);
+      var btnLabel = todosOn ? 'Desmarcar' : 'Selecionar';
+      var membrosJson = JSON.stringify(membros).replace(/'/g,"\\'");
+      out += '<div class="ms-grp" style="display:flex;align-items:center;justify-content:space-between">'
+           + '<span>' + g + '</span>'
+           + '<button onclick="msToggleGrupo(\''+ campo +'\',' + membrosJson + ');event.stopPropagation()" '
+           + 'style="font-size:10px;padding:1px 6px;border:1px solid var(--cinza-borda);border-radius:4px;background:var(--branco);cursor:pointer;color:var(--cinza-texto)">' + btnLabel + '</button>'
+           + '</div>';
       membros.forEach(function(o) {
         var id = 'ms-' + campo + '-' + o.replace(/[^a-zA-Z0-9]/g, '_');
         var chk = MS[campo][o] ? ' checked' : '';
