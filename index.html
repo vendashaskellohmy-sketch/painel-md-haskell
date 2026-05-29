@@ -334,7 +334,7 @@ function renderKPIs(dados){
   dados.forEach(function(r){
     disp+=n(r['Estoque Disponível']);
     custo+=custoTotal(r);
-    var d=dadosDiarios[String(r['Código']||'').replace(/\.0$/,'')]||{und:0,val:0};
+    var d=diariosLookup(r['Código']||r['Código']);
     vendida+=d.und; valor+=d.val;
   });
   document.getElementById('k-disp').textContent=Math.round(disp).toLocaleString('pt-BR');
@@ -348,7 +348,7 @@ function ordenar(d){
   return d.slice().sort(function(a,b){
     var va,vb;
     if(sortCol==='Custo Total'){va=custoTotal(a);vb=custoTotal(b);}
-    else if(sortCol==='Venda Acumulada Und'){va=(dadosDiarios[String(a['Código']||'').replace(/\.0$/,'')]||{und:0}).und;vb=(dadosDiarios[String(b['Código']||'').replace(/\.0$/,'')]||{und:0}).und;}
+    else if(sortCol==='Venda Acumulada Und'){va=diariosLookup(a['Código']||a['Código']).und;vb=diariosLookup(b['Código']||b['Código']).und;}
     else{va=a[sortCol]||'';vb=b[sortCol]||'';if(nums.indexOf(sortCol)>=0){va=n(va);vb=n(vb);}else{va=va.toLowerCase();vb=vb.toLowerCase();}}
     return va<vb?(sortDir==='asc'?-1:1):va>vb?(sortDir==='asc'?1:-1):0;
   });
@@ -388,7 +388,7 @@ function renderTabela(tudo){
       +'<td style="width:52px">'+img+'</td>'
       +'<td class="cod">'+(r['C\u00f3digo']||'\u2014')+'</td>'
       +'<td style="max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+(r['Descri\u00e7\u00e3o']||'')+'">'+(r['Descri\u00e7\u00e3o']||'\u2014')+'</td>'
-      +'<td style="text-align:right">'+((function(k){var d=dadosDiarios[k];return d?Math.round(d.und).toLocaleString('pt-BR'):'0';})(String(r['Código']||'').replace(/\.0$/,'')))+'</td>'
+      +'<td style="text-align:right">'+(function(){var d=diariosLookup(r['Código']||r['Código']);return d.und>0?Math.round(d.und).toLocaleString('pt-BR'):'0';}())+'</td>'
       +'<td style="text-align:right">'+Math.round(n(r['Estoque Dispon\u00edvel'])).toLocaleString('pt-BR')+'</td>'
       +'<td style="text-align:right">'+(ct>0?'R$ '+ct.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}):'<span style="color:var(--cinza-texto)">\u2014</span>')+'</td>'
       +'<td style="text-align:right">'+(cob>0?Math.round(cob)+'d':'\u2014')+'</td>'
@@ -436,12 +436,17 @@ function selecionarLinha(tr,codigo,descCod,e){
   if(linhaSelecionada===codigo){
     linhaSelecionada=null;
     document.querySelectorAll('tr.selecionado').forEach(function(el){el.classList.remove('selecionado');});
+    renderKPIs(dadosFiltrados);
     atualizarGraficoTotal();
     return;
   }
   linhaSelecionada=codigo;
   document.querySelectorAll('tr.selecionado').forEach(function(el){el.classList.remove('selecionado');});
   tr.classList.add('selecionado');
+  var prodSel=dadosFiltrados.filter(function(r){
+    return String(r['Código']||r['Código']||'').replace(/\.0$/,'')==String(codigo).replace(/\.0$/,'');
+  });
+  if(prodSel.length) renderKPIs(prodSel);
   var desc=decodeURIComponent(descCod);
   document.getElementById('graf-titulo').textContent='Vendas Diárias — '+desc;
   document.getElementById('graf-sub').textContent='Código: '+codigo+' • Carregando...';
@@ -713,6 +718,11 @@ function msLimpar() {
 }
 /* ── FIM MULTI-SELEÇÃO ──────────────────────────────────────── */
 
+function diariosLookup(codigo){
+  var k=String(codigo||"").replace(/\.0$/,"").trim();
+  return dadosDiarios[k]||{und:0,val:0};
+}
+
 function carregarDados(){
   document.getElementById('update-time').textContent='Atualizando...';
   document.getElementById('tabela-container').innerHTML='<div class="estado">Carregando dados...</div>';
@@ -725,8 +735,9 @@ function carregarDados(){
     // Indexar vendas diárias por Código
     dadosDiarios={};
     diarias.forEach(function(d){
-      var c=String(d['Código']||d['Código']||'').replace(/\.0$/,'');
-      if(!c) return;
+      var raw=d['Código']!==undefined?d['Código']:d['Código'];
+      var c=String(raw).replace(/\.0$/,'').trim();
+      if(!c||c==='undefined') return;
       if(!dadosDiarios[c]) dadosDiarios[c]={und:0,val:0};
       dadosDiarios[c].und+=n(d['Quantidade']);
       dadosDiarios[c].val+=n(d['Valor']||0);
