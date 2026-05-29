@@ -388,7 +388,7 @@ function renderTabela(tudo){
       +'<td style="width:52px">'+img+'</td>'
       +'<td class="cod">'+(r['C\u00f3digo']||'\u2014')+'</td>'
       +'<td style="max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+(r['Descri\u00e7\u00e3o']||'')+'">'+(r['Descri\u00e7\u00e3o']||'\u2014')+'</td>'
-      +'<td style="text-align:right">'+(dadosDiarios[r['C\u00f3digo']]?Math.round(dadosDiarios[r['C\u00f3digo']].und).toLocaleString('pt-BR'):'0')+'</td>'
+      +'<td style="text-align:right">'+(function(d){return d?Math.round(d.und).toLocaleString('pt-BR'):'0';})(dadosDiarios[r['C\u00f3digo']]||dadosDiarios[r['Código']]||dadosDiarios[r['Codigo']])+'</td>'
       +'<td style="text-align:right">'+Math.round(n(r['Estoque Dispon\u00edvel'])).toLocaleString('pt-BR')+'</td>'
       +'<td style="text-align:right">'+(ct>0?'R$ '+ct.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}):'<span style="color:var(--cinza-texto)">\u2014</span>')+'</td>'
       +'<td style="text-align:right">'+(cob>0?Math.round(cob)+'d':'\u2014')+'</td>'
@@ -436,12 +436,16 @@ function selecionarLinha(tr,codigo,descCod,e){
   if(linhaSelecionada===codigo){
     linhaSelecionada=null;
     document.querySelectorAll('tr.selecionado').forEach(function(el){el.classList.remove('selecionado');});
+    renderKPIs(dadosFiltrados);
     atualizarGraficoTotal();
     return;
   }
   linhaSelecionada=codigo;
   document.querySelectorAll('tr.selecionado').forEach(function(el){el.classList.remove('selecionado');});
   tr.classList.add('selecionado');
+  // Atualizar KPIs com dados do produto selecionado
+  var prodSel=dadosFiltrados.filter(function(r){return r['Código']===codigo||r['Código']===codigo;});
+  if(prodSel.length) renderKPIs(prodSel);
   var desc=decodeURIComponent(descCod);
   document.getElementById('graf-titulo').textContent='Vendas Diárias — '+desc;
   document.getElementById('graf-sub').textContent='Código: '+codigo+' • Carregando...';
@@ -725,7 +729,8 @@ function carregarDados(){
     // Indexar vendas diárias por Código
     dadosDiarios={};
     diarias.forEach(function(d){
-      var c=d['Código'];
+      var c=d['Código']||d['Codigo']||d['Código']||'';
+      if(!c) return;
       if(!dadosDiarios[c]) dadosDiarios[c]={und:0,val:0};
       dadosDiarios[c].und+=n(d['Quantidade']);
       dadosDiarios[c].val+=n(d['Valor']||0);
