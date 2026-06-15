@@ -95,6 +95,17 @@
   .lb-fechar:hover { background:rgba(0,0,0,.7); }
   .estado { text-align:center; padding:3rem 1rem; color:var(--cinza-texto); font-size:14px; }
   .estado.erro { color:#c0392b; }
+  .abas { display:flex; gap:0; border-bottom:2px solid var(--cinza-borda); margin-bottom:1.25rem; }
+  .aba-btn { padding:10px 24px; font-size:14px; font-weight:500; color:var(--cinza-texto); background:none; border:none; border-bottom:3px solid transparent; margin-bottom:-2px; cursor:pointer; transition:color .15s,border-color .15s; }
+  .aba-btn:hover { color:var(--verde); }
+  .aba-btn.ativa { color:var(--verde-escuro); border-bottom-color:var(--verde); font-weight:600; }
+  .aba-conteudo { display:none; }
+  .aba-conteudo.ativa { display:block; }
+  .badge-urgencia { display:inline-block; padding:2px 8px; border-radius:12px; font-size:11px; font-weight:600; }
+  .badge-vermelho { background:#fde8e8; color:#c0392b; }
+  .badge-amarelo  { background:#fef3cd; color:#856404; }
+  .badge-verde    { background:var(--verde-claro); color:var(--verde-escuro); }
+  .badge-cinza    { background:var(--cinza-bg); color:var(--cinza-texto); }
   .toggle-wrap { width:40px; height:22px; background:var(--cinza-borda); border-radius:11px; cursor:pointer; position:relative; transition:background .2s; flex-shrink:0; }
   .toggle-wrap.ativo { background:var(--verde); }
   .toggle-thumb { width:16px; height:16px; background:var(--branco); border-radius:50%; position:absolute; top:3px; left:3px; transition:left .2s; box-shadow:0 1px 3px rgba(0,0,0,.2); }
@@ -264,6 +275,7 @@
       <span class="paginacao-info" id="pag-info"></span>
       <div class="paginacao-btns" id="pag-btns"></div>
     </div>
+  </div>
   </div><!-- /aba-inventario -->
 
   <div id="aba-pedidos" class="aba-conteudo">
@@ -805,66 +817,44 @@ function carregarPedidos(){
     .catch(function(err){document.getElementById("pedidos-container").innerHTML='<div class="estado erro">Erro: '+err.message+'</div>';});
 }
 
-function badgeCobertura(dias) {
-  if (dias === null || dias === undefined || isNaN(dias)) return '<span class="badge-urgencia badge-cinza">Sem dados</span>';
-  if (dias < 30)  return '<span class="badge-urgencia badge-vermelho">&#9888; ' + Math.round(dias) + 'd</span>';
-  if (dias < 60)  return '<span class="badge-urgencia badge-amarelo">&#9203; ' + Math.round(dias) + 'd</span>';
-  return '<span class="badge-urgencia badge-verde">&#10003; ' + Math.round(dias) + 'd</span>';
+function badgeCobertura(dias){
+  if(!dias||isNaN(dias)) return '<span class="badge-urgencia badge-cinza">Sem dados</span>';
+  if(dias<30) return '<span class="badge-urgencia badge-vermelho">&#9888; '+Math.round(dias)+'d</span>';
+  if(dias<60) return '<span class="badge-urgencia badge-amarelo">&#9203; '+Math.round(dias)+'d</span>';
+  return '<span class="badge-urgencia badge-verde">&#10003; '+Math.round(dias)+'d</span>';
 }
 
-function renderCompras(dados) {
-  // Filtrar: apenas com cobertura < 90d e média > 0
-  var TIPOS_EXCLUIDOS = ["Sache","Vitrine","Mesa","Balcao","Bolsa","Caixa de Presente","Carta","Mala"];
-  var CODIGOS_EXCLUIDOS = ["5012023","5012024","5012025","5012026","5012027","1011121","5011022","5011026",
-    "5011025","1013132","1011117","1011162","1011205","1011206","1013164","1013029",
-    "5012029","5012028","5012063","1011210"];
-  var itens = dados.filter(function(r) {
-    var cod = String(r["Código"]||"").replace(/\.0$/,"");
-    if (TIPOS_EXCLUIDOS.indexOf(r["Tipo"]||"") >= 0) return false;
-    if (r["Status"] === "Sob demanda") return false;
-    if (CODIGOS_EXCLUIDOS.indexOf(cod) >= 0) return false;
-    var cob = n(r["Cobertura"]);
-    var media = n(r["Média de Vendas Diárias"]);
-    return media > 0 && cob < 90;
+function renderCompras(dados){
+  var TIPOS_EXC=["Sache","Vitrine","Mesa","Balcao","Bolsa","Caixa de Presente","Carta","Mala"];
+  var CODS_EXC=["5012023","5012024","5012025","5012026","5012027","1011121","5011022","5011026","5011025","1013132","1011117","1011162","1011205","1011206","1013164","1013029","5012029","5012028","5012063","1011210"];
+  var itens=dados.filter(function(r){
+    var cod=String(r["Código"]||"").replace(/\.0$/,"");
+    if(TIPOS_EXC.indexOf(r["Tipo"]||"")>=0) return false;
+    if(r["Status"]==="Sob demanda") return false;
+    if(CODS_EXC.indexOf(cod)>=0) return false;
+    return n(r["Média de Vendas Diárias"])>0 && n(r["Cobertura"])<90;
   });
-  // Ordenar: menor cobertura primeiro
-  itens.sort(function(a,b){ return n(a["Cobertura"]) - n(b["Cobertura"]); });
-  document.getElementById("compras-count").textContent = itens.length + " itens";
-  if (!itens.length) {
-    document.getElementById("compras-container").innerHTML = '<div class="estado">Nenhum item abaixo da cobertura alvo de 90 dias.</div>';
-    return;
-  }
-  var thead = "<tr>"
-    + "<th>Cobertura</th>"
-    + "<th>Código</th>"
-    + "<th>Descrição</th>"
-    + "<th>Tipo</th>"
-    + "<th style='text-align:right'>Estoque Disp.</th>"
-    + "<th style='text-align:right'>Média Diária</th>"
-    + "<th style='text-align:right'>Leadtime</th>"
-    + "<th style='text-align:right'>Qtd. Sugerida</th>"
-    + "</tr>";
-  var tbody = itens.map(function(r) {
-    var cob = n(r["Cobertura"]);
-    var media = n(r["Média de Vendas Diárias"]);
-    var lt = n(r["Leadtime"])||30;
-    var est = n(r["Estoque Disponível"]);
-    var meta = media * (90 + lt);
-    var qtd = Math.max(0, Math.floor((meta - est) / 10) * 10);
-    var cod = String(r["Código"]||"").replace(/\.0$/,"");
+  itens.sort(function(a,b){return n(a["Cobertura"])-n(b["Cobertura"]);});
+  document.getElementById("compras-count").textContent=itens.length+" itens";
+  if(!itens.length){document.getElementById("compras-container").innerHTML='<div class="estado">Nenhum item abaixo da cobertura alvo de 90 dias.</div>';return;}
+  var thead="<tr><th>Cobertura</th><th>Código</th><th>Descrição</th><th>Tipo</th><th style='text-align:right'>Estoque Disp.</th><th style='text-align:right'>Média Diária</th><th style='text-align:right'>Leadtime</th><th style='text-align:right'>Qtd. Sugerida</th></tr>";
+  var tbody=itens.map(function(r){
+    var cob=n(r["Cobertura"]),media=n(r["Média de Vendas Diárias"]);
+    var lt=n(r["Leadtime"])||30,est=n(r["Estoque Disponível"]);
+    var qtd=Math.max(0,Math.floor((media*(90+lt)-est)/10)*10);
+    var cod=String(r["Código"]||"").replace(/\.0$/,"");
     return "<tr>"
-      + "<td>" + badgeCobertura(cob) + "</td>"
-      + "<td class='cod'>" + cod + "</td>"
-      + "<td>" + (r["Descrição"]||"—") + "</td>"
-      + "<td>" + (r["Tipo"]||"—") + "</td>"
-      + "<td style='text-align:right'>" + Math.round(est).toLocaleString("pt-BR") + "</td>"
-      + "<td style='text-align:right'>" + media.toFixed(1) + "</td>"
-      + "<td style='text-align:right'>" + Math.round(lt) + "d</td>"
-      + "<td style='text-align:right;font-weight:600;color:var(--verde-escuro)'>" + qtd.toLocaleString("pt-BR") + "</td>"
-      + "</tr>";
+      +"<td>"+badgeCobertura(cob)+"</td>"
+      +"<td class='cod'>"+cod+"</td>"
+      +"<td>"+(r["Descrição"]||"—")+"</td>"
+      +"<td>"+(r["Tipo"]||"—")+"</td>"
+      +"<td style='text-align:right'>"+Math.round(est).toLocaleString("pt-BR")+"</td>"
+      +"<td style='text-align:right'>"+media.toFixed(1)+"</td>"
+      +"<td style='text-align:right'>"+Math.round(lt)+"d</td>"
+      +"<td style='text-align:right;font-weight:600;color:var(--verde-escuro)'>"+qtd.toLocaleString("pt-BR")+"</td>"
+      +"</tr>";
   }).join("");
-  document.getElementById("compras-container").innerHTML =
-    "<table><thead>" + thead + "</thead><tbody>" + tbody + "</tbody></table>";
+  document.getElementById("compras-container").innerHTML="<table><thead>"+thead+"</thead><tbody>"+tbody+"</tbody></table>";
 }
 
 function carregarDados(){
