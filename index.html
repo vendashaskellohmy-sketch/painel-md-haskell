@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Haskell BI — Materiais de Divulgação</title>
+<title>Materiais de Divulgação · Haskell BI</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
@@ -95,8 +95,8 @@
   .lb-fechar:hover { background:rgba(0,0,0,.7); }
   .estado { text-align:center; padding:3rem 1rem; color:var(--cinza-texto); font-size:14px; }
   .estado.erro { color:#c0392b; }
-  .abas { display:flex; gap:0; border-bottom:2px solid var(--cinza-borda); margin-bottom:1.25rem; }
-  .aba-btn { padding:10px 24px; font-size:14px; font-weight:500; color:var(--cinza-texto); background:none; border:none; border-bottom:3px solid transparent; margin-bottom:-2px; cursor:pointer; transition:color .15s,border-color .15s; }
+  .abas { display:flex; gap:0; background:var(--branco); border-bottom:2px solid var(--cinza-borda); padding:0 24px; margin-bottom:0; }
+  .aba-btn { background:none; border:none; color:var(--cinza-texto); font-size:.9rem; font-weight:500; padding:12px 22px; cursor:pointer; border-bottom:3px solid transparent; margin-bottom:-2px; transition:all .15s; white-space:nowrap; }
   .aba-btn:hover { color:var(--verde); }
   .aba-btn.ativa { color:var(--verde-escuro); border-bottom-color:var(--verde); font-weight:600; }
   .aba-conteudo { display:none; }
@@ -169,22 +169,22 @@
     <h1>Materiais de Divulgação</h1>
     <p id="update-time">Aguardando...</p>
   </div>
-  <a href="https://haskellbi.com.br" style="margin-left:8px;font-size:.75rem;color:rgba(255,255,255,.6);text-decoration:none;">← Portal</a>
-<div class="header-btns" style="gap:16px">
+  <div class="header-btns" style="gap:16px">
     <div style="display:flex;align-items:center;gap:6px">
       <span style="font-size:12px;font-weight:500;color:rgba(255,255,255,.75)">Mostrar Sachês? </span>
       <div class="toggle-wrap" onclick="toggleSache()" id="toggle-sache"><div class="toggle-thumb"></div></div>
     </div>
+    <a href="https://haskellbi.com.br" style="font-size:.75rem;color:rgba(255,255,255,.6);text-decoration:none;display:flex;align-items:center;">← Portal</a>
     <button class="btn btn-pdf" onclick="gerarPDF()">&#x2935; PDF</button>
   </div>
 </header>
 
+<div class="abas">
+  <button class="aba-btn ativa" onclick="trocarAba('inventario',this)">Inventário</button>
+  <button class="aba-btn" onclick="trocarAba('pedidos',this)">Pedidos</button>
+  <button class="aba-btn" onclick="trocarAba('compras',this)">Sugestão de Compra</button>
+</div>
 <main class="container">
-  <div class="abas">
-    <button class="aba-btn ativa" onclick="trocarAba('inventario',this)">Inventário</button>
-    <button class="aba-btn" onclick="trocarAba('pedidos',this)">Pedidos</button>
-    <button class="aba-btn" onclick="trocarAba('compras',this)">Sugestão de Compra</button>
-  </div>
   <div id="aba-inventario" class="aba-conteudo ativa">
   <div class="kpis">
     <div class="kpi"><div class="kpi-label">Estoque Disponível</div><div class="kpi-value" id="k-disp">—</div><div class="kpi-sub">unidades</div></div>
