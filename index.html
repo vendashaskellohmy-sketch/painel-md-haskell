@@ -429,7 +429,10 @@ function renderTabela(tudo){
     var img=urlImg
       ?'<img class="prod-img" src="'+urlImg+'" alt="" loading="lazy" onclick="lbAbrir(this.src,event)" onerror="this.outerHTML=\'<div class=\\\'img-ph\\\'>&#128230;</div>\'">'
       :'<div class="img-ph">&#128230;</div>';
-    var cob=n(r['Cobertura']),ct=custoTotal(r);
+    var _dias2026=Math.round((new Date()-new Date(new Date().getFullYear(),0,1))/(1000*60*60*24))||1;
+    var _d2026=diariosLookup(r['Código']||r['Código']);
+    var _med2026=_d2026.und>0?(_d2026.und/_dias2026):0;
+    var cob=_med2026>0?n(r['Estoque Disponível'])/_med2026:0,ct=custoTotal(r);
     var sel=linhaSelecionada===r['C\u00f3digo']?' selecionado':'';
     return'<tr class="'+sel+'" onclick="selecionarLinha(this,\''+r['C\u00f3digo']+'\',\''+encodeURIComponent(r['Descri\u00e7\u00e3o']||'')+'\',event)">'
       +'<td style="width:52px">'+img+'</td>'
