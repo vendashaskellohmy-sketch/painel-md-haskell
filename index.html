@@ -840,24 +840,30 @@ function renderCompras(dados){
     if(TIPOS_EXC.indexOf(r["Tipo"]||"")>=0) return false;
     if(r["Status"]==="Sob demanda") return false;
     if(CODS_EXC.indexOf(cod)>=0) return false;
-    return n(r["Média de Vendas Diárias"])>0 && n(r["Cobertura"])<90;
+    var _d2=diariosLookup(r["Código"]||r["Código"]);
+    var _dias2=Math.round((new Date()-new Date(new Date().getFullYear(),0,1))/(1000*60*60*24))||1;
+    var _med2=_d2.und>0?(_d2.und/_dias2):0;
+    var _cob2=_med2>0?n(r["Estoque Disponível"])/_med2:0;
+    return _med2>0 && _cob2<90 && (r["Linha"]||"").toLowerCase()==="institucional";
   });
   itens.sort(function(a,b){return n(a["Cobertura"])-n(b["Cobertura"]);});
   document.getElementById("compras-count").textContent=itens.length+" itens";
   if(!itens.length){document.getElementById("compras-container").innerHTML='<div class="estado">Nenhum item abaixo da cobertura alvo de 90 dias.</div>';return;}
-  var thead="<tr><th>Cobertura</th><th>Código</th><th>Descrição</th><th>Tipo</th><th style='text-align:right'>Estoque Disp.</th><th style='text-align:right'>Média Diária</th><th style='text-align:right'>Leadtime</th><th style='text-align:right'>Qtd. Sugerida</th></tr>";
+  var thead="<tr><th>Cobertura</th><th>Código</th><th>Descrição</th><th style='text-align:right'>Estoque Disp.</th><th style='text-align:right'>Média Diária</th><th style='text-align:right'>Leadtime</th><th style='text-align:right'>Qtd. Sugerida</th></tr>";
+  var _dias2026=Math.round((new Date()-new Date(new Date().getFullYear(),0,1))/(1000*60*60*24))||1;
   var tbody=itens.map(function(r){
-    var cob=n(r["Cobertura"]),media=n(r["Média de Vendas Diárias"]);
-    var lt=n(r["Leadtime"])||30,est=n(r["Estoque Disponível"]);
-    var qtd=Math.max(0,Math.floor((media*(90+lt)-est)/10)*10);
     var cod=String(r["Código"]||"").replace(/\.0$/,"");
+    var _d=diariosLookup(r["Código"]||r["Código"]);
+    var media2026=_d.und>0?(_d.und/_dias2026):0;
+    var est=n(r["Estoque Disponível"]),lt=n(r["Leadtime"])||30;
+    var cob2026=media2026>0?est/media2026:0;
+    var qtd=Math.max(0,Math.floor((media2026*(90+lt)-est)/10)*10);
     return "<tr>"
-      +"<td>"+badgeCobertura(cob)+"</td>"
+      +"<td>"+badgeCobertura(cob2026)+"</td>"
       +"<td class='cod'>"+cod+"</td>"
       +"<td>"+(r["Descrição"]||"—")+"</td>"
-      +"<td>"+(r["Tipo"]||"—")+"</td>"
       +"<td style='text-align:right'>"+Math.round(est).toLocaleString("pt-BR")+"</td>"
-      +"<td style='text-align:right'>"+media.toFixed(1)+"</td>"
+      +"<td style='text-align:right'>"+(media2026>0?media2026.toFixed(2):"—")+"</td>"
       +"<td style='text-align:right'>"+Math.round(lt)+"d</td>"
       +"<td style='text-align:right;font-weight:600;color:var(--verde-escuro)'>"+qtd.toLocaleString("pt-BR")+"</td>"
       +"</tr>";
