@@ -802,7 +802,7 @@ function renderPedidos(dados){
   document.getElementById("pedidos-count").textContent=dados.length+" pedidos";
   if(!dados.length){document.getElementById("pedidos-container").innerHTML='<div class="estado">Nenhum pedido encontrado.</div>';return;}
   var ord=dados.slice().sort(function(a,b){return diasParaChegar(a["Previsão de Chegada"])-diasParaChegar(b["Previsão de Chegada"]);});
-  var thead="<tr><th>Urgência</th><th>Previsão</th><th>Código</th><th>Descrição</th><th style='text-align:right'>Qtd.</th><th>Pedido</th></tr>";
+  var thead="<tr><th>Urgência</th><th>Previsão</th><th>Código</th><th>Descrição</th><th style='text-align:right'>Qtd.</th><th style='text-align:right'>Estoque Disp.</th><th>Pedido</th></tr>";
   var tbody=ord.map(function(r){
     var prev=r["Previsão de Chegada"]||"";
     return "<tr>"
@@ -811,6 +811,7 @@ function renderPedidos(dados){
       +"<td class='cod'>"+(r["Código"]||"—")+"</td>"
       +"<td>"+(r["Descrição"]||"—")+"</td>"
       +"<td style='text-align:right'>"+n(r["Reposição a Entrar"]).toLocaleString("pt-BR")+"</td>"
+      +"<td style='text-align:right'>"+(function(){var cod=String(r["Código"]||"").replace(/\.0$/,"");var p=dadosOriginais.find(function(x){return String(x["Código"]||x["C\u00f3digo"]||"").replace(/\.0$/,"")==cod;});return p?Math.round(n(p["Estoque Dispon\u00edvel"])).toLocaleString("pt-BR"):"—";}())+"</td>"
       +"<td>"+(r["Pedido de Compra"]||"—")+"</td>"
       +"</tr>";
   }).join("");
