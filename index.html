@@ -849,7 +849,7 @@ function renderCompras(dados){
   itens.sort(function(a,b){return n(a["Cobertura"])-n(b["Cobertura"]);});
   document.getElementById("compras-count").textContent=itens.length+" itens";
   if(!itens.length){document.getElementById("compras-container").innerHTML='<div class="estado">Nenhum item abaixo da cobertura alvo de 90 dias.</div>';return;}
-  var thead="<tr><th>Cobertura</th><th>Código</th><th>Descrição</th><th style='text-align:right'>Estoque Disp.</th><th style='text-align:right'>Média Diária</th><th style='text-align:right'>Leadtime</th><th style='text-align:right'>Qtd. Sugerida</th></tr>";
+  var thead="<tr><th>Cobertura</th><th>Código</th><th>Descrição</th><th>Status</th><th style='text-align:right'>Estoque Disp.</th><th style='text-align:right'>Média Diária</th><th style='text-align:right'>Leadtime</th><th style='text-align:right'>Qtd. Sugerida</th></tr>";
   var _dias2026=Math.round((new Date()-new Date(new Date().getFullYear(),0,1))/(1000*60*60*24))||1;
   var tbody=itens.map(function(r){
     var cod=String(r["Código"]||"").replace(/\.0$/,"");
@@ -862,6 +862,7 @@ function renderCompras(dados){
       +"<td>"+badgeCobertura(cob2026)+"</td>"
       +"<td class='cod'>"+cod+"</td>"
       +"<td>"+(r["Descrição"]||"—")+"</td>"
+      +"<td>"+(r["Status"]||"—")+"</td>"
       +"<td style='text-align:right'>"+Math.round(est).toLocaleString("pt-BR")+"</td>"
       +"<td style='text-align:right'>"+(media2026>0?media2026.toFixed(2):"—")+"</td>"
       +"<td style='text-align:right'>"+Math.round(lt)+"d</td>"
