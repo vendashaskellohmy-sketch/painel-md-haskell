@@ -137,6 +137,7 @@
   .ms-opt:hover { background:var(--verde-claro); }
   .ms-opt input { accent-color:var(--verde); width:14px; height:14px; flex-shrink:0; cursor:pointer; }
   .ms-opt label { cursor:pointer; flex:1; margin:0; font-weight:400; }
+  .ms-opt.ativo { background:var(--verde-claro); font-weight:600; color:var(--verde-escuro); }
   .ms-search { width:100%; padding:6px 10px; border:none; border-bottom:1px solid var(--cinza-borda); font-size:12px; outline:none; box-sizing:border-box; }
   .ms-search:focus { border-bottom-color:var(--verde); }
   .ms-grp { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.8px; color:var(--cinza-texto); padding:6px 12px 2px; background:var(--cinza-bg); }
@@ -183,6 +184,7 @@
   <button class="aba-btn ativa" onclick="trocarAba('inventario',this)">Inventário</button>
   <button class="aba-btn" onclick="trocarAba('pedidos',this)">Pedidos</button>
   <button class="aba-btn" onclick="trocarAba('compras',this)">Sugestão de Compra</button>
+  <button class="aba-btn" onclick="trocarAba('distribuidor',this)">Vendas por Distribuidor</button>
 </div>
 <main class="container">
   <div id="aba-inventario" class="aba-conteudo ativa">
@@ -305,6 +307,86 @@
       </div>
     </div>
   </div><!-- /aba-compras -->
+
+  <div id="aba-distribuidor" class="aba-conteudo">
+    <div class="kpis">
+      <div class="kpi"><div class="kpi-label">Distribuidores Ativos</div><div class="kpi-value" id="kd-distribuidores">—</div><div class="kpi-sub">no período</div></div>
+      <div class="kpi" style="border-left-color:var(--verde-escuro)"><div class="kpi-label">Unidades via Verba de MD</div><div class="kpi-value" id="kd-verba">—</div><div class="kpi-sub">bonificação</div></div>
+      <div class="kpi"><div class="kpi-label">Unidades via Recurso Próprio</div><div class="kpi-value" id="kd-proprio">—</div><div class="kpi-sub">venda</div></div>
+      <div class="kpi"><div class="kpi-label">Valor Total (R$)</div><div class="kpi-value" style="font-size:17px" id="kd-valor">—</div><div class="kpi-sub">valor líquido no período</div></div>
+    </div>
+
+    <div class="filtros-card">
+      <label>Buscar<input type="text" id="fd-busca" placeholder="Distribuidor, código ou descrição..." oninput="aplicarFiltrosDist()"></label>
+      <label>Distribuidor
+        <select id="fd-distribuidor" onchange="aplicarFiltrosDist()">
+          <option value="">Todos</option>
+        </select>
+      </label>
+      <label>Item
+        <div class="ms-wrap">
+          <button type="button" class="ms-btn" id="fd-item-btn" onclick="itemDdToggle()">
+            <span class="ms-label" id="fd-item-lbl">Todos</span>
+            <span class="ms-arrow">&#9660;</span>
+          </button>
+          <div class="ms-dd" id="fd-item-dd" style="max-height:260px"></div>
+        </div>
+      </label>
+      <label>Origem
+        <select id="fd-categoria" onchange="aplicarFiltrosDist()">
+          <option value="">Todas</option>
+          <option value="Bonificação">Verba de MD</option>
+          <option value="Venda">Recurso Próprio</option>
+        </select>
+      </label>
+      <label>De
+        <input type="date" id="fd-de" onchange="aplicarFiltrosDist()">
+      </label>
+      <label>Até
+        <input type="date" id="fd-ate" onchange="aplicarFiltrosDist()">
+      </label>
+      <label style="flex-direction:row;align-items:flex-end;justify-content:flex-end;height:34px;margin-top:18px">
+        <button onclick="limparFiltrosDist()" style="background:none;border:1px solid var(--cinza-borda);border-radius:6px;padding:5px 14px;font-size:12px;cursor:pointer;color:var(--cinza-texto);height:34px;white-space:nowrap">&#x2715; Limpar filtros</button>
+      </label>
+    </div>
+
+    <div class="grafico-card">
+      <div class="grafico-header">
+        <div>
+          <div class="grafico-titulo">Verba de MD vs. Recurso Próprio</div>
+          <div class="grafico-sub" id="dist-graf-sub">Agrupado por distribuidor</div>
+        </div>
+        <label style="font-size:12px;color:var(--cinza-texto);display:flex;align-items:center;gap:6px">
+          Agrupar por:
+          <select id="dist-graf-agrupar" onchange="trocarAgrupamentoDist(this.value)" style="font-size:12px;padding:4px 8px;border:1px solid var(--cinza-borda);border-radius:6px;background:var(--branco);color:var(--texto)">
+            <option value="Total" selected>Total (Verba MD x Recurso Próprio)</option>
+            <option value="Distribuidor">Distribuidor</option>
+            <option value="Codigo">Item (Código)</option>
+          </select>
+        </label>
+      </div>
+      <div style="position:relative;height:280px" id="dist-graf-wrap">
+        <div class="grafico-placeholder">Carregando...</div>
+      </div>
+    </div>
+
+    <div class="tabela-card">
+      <div class="tabela-header">
+        <span>Vendas por Distribuidor</span>
+        <div style="display:flex;align-items:center;gap:12px">
+          <span class="tabela-count" id="dist-count">— registros</span>
+          <button onclick="downloadCSVDist()" style="background:none;border:1px solid var(--cinza-borda);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;color:var(--cinza-texto)">&#x2B07; CSV</button>
+        </div>
+      </div>
+      <div class="tabela-scroll">
+        <div id="dist-container"><div class="estado">Clique na aba para carregar.</div></div>
+      </div>
+      <div class="paginacao">
+        <span class="paginacao-info" id="dist-pag-info"></span>
+        <div class="paginacao-btns" id="dist-pag-btns"></div>
+      </div>
+    </div>
+  </div><!-- /aba-distribuidor -->
 </main>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
@@ -317,6 +399,9 @@ const POR_PAGINA = 50;
 let dadosOriginais=[], dadosFiltrados=[], dadosDiarios={};
 let paginaAtual=1, sortCol='Descri\u00e7\u00e3o', sortDir='asc';
 let linhaSelecionada=null, graficoAtivo=null;
+let distDadosBrutos=[], distDadosFiltrados=[], distPaginaAtual=1, distSortCol='Quantidade', distSortDir='desc', distCarregado=false;
+let distGraficoAtivo=null, distAgruparPor='Total';
+let fdItemSelecionado='', fdItemOpcoes=[];
 
 function verificarSenha(){
   var s=document.getElementById('login-senha').value;
@@ -651,6 +736,10 @@ document.addEventListener('click', function(e) {
       if (dd) dd.classList.remove('open');
     });
   }
+  if (!e.target.closest('#fd-item-dd') && !e.target.closest('#fd-item-btn')) {
+    var ddItem = document.getElementById('fd-item-dd');
+    if (ddItem) ddItem.classList.remove('open');
+  }
 });
 
 function msPopularComBusca(campo, opcoes, labelFn) {
@@ -783,6 +872,7 @@ function trocarAba(id,btn){
   btn.classList.add("ativa");
   if(id==="pedidos") carregarPedidos();
   if(id==="compras") renderCompras(dadosOriginais);
+  if(id==="distribuidor" && !distCarregado){ distCarregado=true; carregarDistribuidor(); }
 }
 
 function badgeUrgencia(dataStr){
@@ -849,7 +939,7 @@ function renderCompras(dados){
   itens.sort(function(a,b){return n(a["Cobertura"])-n(b["Cobertura"]);});
   document.getElementById("compras-count").textContent=itens.length+" itens";
   if(!itens.length){document.getElementById("compras-container").innerHTML='<div class="estado">Nenhum item abaixo da cobertura alvo de 90 dias.</div>';return;}
-  var thead="<tr><th>Cobertura</th><th>Código</th><th>Descrição</th><th>Status</th><th style='text-align:right'>Estoque Disp.</th><th style='text-align:right'>Média Diária</th><th style='text-align:right'>Leadtime</th><th style='text-align:right'>Qtd. Sugerida</th></tr>";
+  var thead="<tr><th>Cobertura</th><th>Código</th><th>Descrição</th><th style='text-align:right'>Estoque Disp.</th><th style='text-align:right'>Média Diária</th><th style='text-align:right'>Leadtime</th><th style='text-align:right'>Qtd. Sugerida</th></tr>";
   var _dias2026=Math.round((new Date()-new Date(new Date().getFullYear(),0,1))/(1000*60*60*24))||1;
   var tbody=itens.map(function(r){
     var cod=String(r["Código"]||"").replace(/\.0$/,"");
@@ -862,7 +952,6 @@ function renderCompras(dados){
       +"<td>"+badgeCobertura(cob2026)+"</td>"
       +"<td class='cod'>"+cod+"</td>"
       +"<td>"+(r["Descrição"]||"—")+"</td>"
-      +"<td>"+(r["Status"]||"—")+"</td>"
       +"<td style='text-align:right'>"+Math.round(est).toLocaleString("pt-BR")+"</td>"
       +"<td style='text-align:right'>"+(media2026>0?media2026.toFixed(2):"—")+"</td>"
       +"<td style='text-align:right'>"+Math.round(lt)+"d</td>"
@@ -871,6 +960,381 @@ function renderCompras(dados){
   }).join("");
   document.getElementById("compras-container").innerHTML="<table><thead>"+thead+"</thead><tbody>"+tbody+"</tbody></table>";
 }
+
+/* ── ABA VENDAS POR DISTRIBUIDOR ── */
+function carregarDistribuidor(){
+  document.getElementById("dist-container").innerHTML='<div class="estado">Carregando...</div>';
+  function fetchPagina(offset,acc){
+    return sbFetch('md_vendas_distribuidor','select=C%C3%B3digo,IBTEC,Distribuidor,Categoria,Data,Quantidade,Valor&order=Data.asc&limit=1000&offset='+offset)
+      .then(function(pagina){
+        acc=acc.concat(pagina);
+        if(pagina.length===1000) return fetchPagina(offset+1000,acc);
+        return acc;
+      });
+  }
+  fetchPagina(0,[]).then(function(linhas){
+    distDadosBrutos=linhas.map(function(l){
+      var cod=String(l['Código']||'').replace(/\.0$/,'').trim();
+      var prod=dadosOriginais.find(function(x){return String(x['Código']||'').replace(/\.0$/,'')===cod;});
+      return {
+        'Código':cod,
+        'Descrição':prod?prod['Descrição']:'—',
+        IBTEC:l['IBTEC']||'N/D',
+        Distribuidor:l['Distribuidor']||'Outros/Não Distribuidor',
+        Categoria:l['Categoria']||'Outro',
+        Data:l['Data'],
+        Quantidade:n(l['Quantidade']),
+        Valor:n(l['Valor'])
+      };
+    });
+    popularFiltroDistribuidor();
+    popularFiltroItemDist();
+    popularPeriodoDist();
+    aplicarFiltrosDist();
+  }).catch(function(err){
+    document.getElementById('dist-container').innerHTML='<div class="estado erro">Erro: '+err.message+'</div>';
+  });
+}
+
+function popularFiltroDistribuidor(){
+  var nomes=[];
+  distDadosBrutos.forEach(function(r){ if(nomes.indexOf(r.Distribuidor)<0) nomes.push(r.Distribuidor); });
+  nomes.sort(function(a,b){return a.localeCompare(b,'pt-BR');});
+  var sel=document.getElementById('fd-distribuidor');
+  var atual=sel.value;
+  sel.innerHTML='<option value="">Todos</option>'+nomes.map(function(nm){
+    return '<option value="'+nm.replace(/"/g,'&quot;')+'">'+nm+'</option>';
+  }).join('');
+  sel.value=atual;
+}
+
+function popularFiltroItemDist(){
+  var itens={};
+  distDadosBrutos.forEach(function(r){ itens[r['Código']]=r['Descrição']; });
+  fdItemOpcoes=Object.keys(itens).sort().map(function(c){return {codigo:c, descricao:itens[c]||''};});
+  montarDropdownItemDist();
+  atualizarLabelItemDist();
+}
+
+function montarDropdownItemDist(){
+  var dd=document.getElementById('fd-item-dd');
+  if(!dd) return;
+  function render(filtro){
+    var f=(filtro||'').toLowerCase();
+    var itens = f ? fdItemOpcoes.filter(function(o){
+      return o.codigo.toLowerCase().indexOf(f)>=0 || (o.descricao||'').toLowerCase().indexOf(f)>=0;
+    }) : fdItemOpcoes;
+    var lista = '<div class="ms-opt'+(fdItemSelecionado===''?' ativo':'')+'" onclick="selecionarItemDist(\'\')"><label>Todos</label></div>'
+      + itens.map(function(o){
+        var rotulo=(o.codigo+' – '+(o.descricao||'').substring(0,40)).replace(/</g,'&lt;');
+        var ativo=fdItemSelecionado===o.codigo?' ativo':'';
+        return '<div class="ms-opt'+ativo+'" onclick="selecionarItemDist(\''+o.codigo+'\')"><label>'+rotulo+'</label></div>';
+      }).join('');
+    var existente=dd.querySelector('.ms-items');
+    if(existente) existente.innerHTML=lista;
+  }
+  dd.innerHTML='<input type="text" class="ms-search" placeholder="Buscar por código ou nome..." oninput="(function(el){var w=el.closest(\'.ms-dd\');if(w&&w._renderFn)w._renderFn(el.value);})(this)">'
+    + '<div class="ms-items" style="max-height:220px;overflow-y:auto"></div>';
+  dd._renderFn=render;
+  render('');
+}
+
+function selecionarItemDist(codigo){
+  fdItemSelecionado=codigo;
+  atualizarLabelItemDist();
+  var dd=document.getElementById('fd-item-dd');
+  dd.classList.remove('open');
+  if(dd._renderFn) dd._renderFn('');
+  aplicarFiltrosDist();
+}
+
+function atualizarLabelItemDist(){
+  var lbl=document.getElementById('fd-item-lbl');
+  if(!lbl) return;
+  if(!fdItemSelecionado){ lbl.textContent='Todos'; return; }
+  var op=fdItemOpcoes.find(function(o){return o.codigo===fdItemSelecionado;});
+  lbl.textContent = op ? (op.codigo+' – '+(op.descricao||'').substring(0,24)) : fdItemSelecionado;
+}
+
+function itemDdToggle(){
+  var dd=document.getElementById('fd-item-dd');
+  var abrir=!dd.classList.contains('open');
+  document.querySelectorAll('.ms-dd').forEach(function(el){el.classList.remove('open');});
+  if(abrir){
+    dd.classList.add('open');
+    var inp=dd.querySelector('.ms-search');
+    if(inp){ inp.value=''; inp.focus(); if(dd._renderFn) dd._renderFn(''); }
+  }
+}
+
+function popularPeriodoDist(){
+  if(!distDadosBrutos.length) return;
+  var datas=distDadosBrutos.map(function(r){return r.Data;}).sort();
+  var min=datas[0], max=datas[datas.length-1];
+  var de=document.getElementById('fd-de'), ate=document.getElementById('fd-ate');
+  de.min=min; de.max=max; ate.min=min; ate.max=max;
+  if(!de.value) de.value=min;
+  if(!ate.value) ate.value=max;
+}
+
+function atualizarKpisDist(){
+  var distintos={};
+  var totVerba=0, totProprio=0, totValor=0;
+  distDadosFiltrados.forEach(function(r){
+    if(r.IBTEC && r.IBTEC!=='N/D') distintos[r.IBTEC]=true;
+    if(r.Categoria==='Bonificação') totVerba+=r.Quantidade;
+    if(r.Categoria==='Venda') totProprio+=r.Quantidade;
+    totValor+=r.Valor;
+  });
+  document.getElementById('kd-distribuidores').textContent=Object.keys(distintos).length;
+  document.getElementById('kd-verba').textContent=Math.round(totVerba).toLocaleString('pt-BR');
+  document.getElementById('kd-proprio').textContent=Math.round(totProprio).toLocaleString('pt-BR');
+  document.getElementById('kd-valor').textContent='R$ '+totValor.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+
+function dadosGraficoDist(agruparPor){
+  if(agruparPor==='Total'){
+    var totVerba=0, totProprio=0;
+    distDadosFiltrados.forEach(function(r){
+      if(r.Categoria==='Bonificação') totVerba+=r.Valor;
+      else if(r.Categoria==='Venda') totProprio+=r.Valor;
+    });
+    return {modo:'Total', labels:['Verba de MD','Recurso Próprio'], valores:[totVerba,totProprio]};
+  }
+  var mapa={};
+  var LIMITE=15;
+  distDadosFiltrados.forEach(function(r){
+    var chave = agruparPor==='Codigo'
+      ? (r['Código']+' – '+(r['Descrição']||'').substring(0,22))
+      : r.Distribuidor;
+    if(!mapa[chave]) mapa[chave]={verba:0,proprio:0,total:0};
+    if(r.Categoria==='Bonificação') mapa[chave].verba+=r.Quantidade;
+    else if(r.Categoria==='Venda') mapa[chave].proprio+=r.Quantidade;
+    mapa[chave].total+=r.Quantidade;
+  });
+  var chaves=Object.keys(mapa).sort(function(a,b){return mapa[b].total-mapa[a].total;});
+  if(chaves.length>LIMITE){
+    var top=chaves.slice(0,LIMITE);
+    var outros={verba:0,proprio:0,total:0};
+    chaves.slice(LIMITE).forEach(function(k){outros.verba+=mapa[k].verba;outros.proprio+=mapa[k].proprio;outros.total+=mapa[k].total;});
+    mapa['Outros ('+(chaves.length-LIMITE)+')']=outros;
+    chaves=top.concat(['Outros ('+(chaves.length-LIMITE)+')']);
+  }
+  return {
+    modo:'Detalhe',
+    labels:chaves,
+    verba:chaves.map(function(k){return mapa[k].verba;}),
+    proprio:chaves.map(function(k){return mapa[k].proprio;})
+  };
+}
+
+function atualizarGraficoDist(){
+  var wrap=document.getElementById('dist-graf-wrap');
+  var d=dadosGraficoDist(distAgruparPor);
+  var sub=document.getElementById('dist-graf-sub');
+  if(d.modo==='Total'){
+    sub.textContent='Valor líquido total no período selecionado, por origem do recurso';
+  }else{
+    sub.textContent = distAgruparPor==='Codigo'
+      ? 'Agrupado por item • top '+d.labels.length+' por quantidade'
+      : 'Agrupado por distribuidor • top '+d.labels.length+' por quantidade';
+  }
+  if(!d.labels.length){
+    if(distGraficoAtivo){distGraficoAtivo.destroy();distGraficoAtivo=null;}
+    wrap.innerHTML='<div class="grafico-placeholder">Nenhum dado para exibir com os filtros atuais.</div>';
+    return;
+  }
+  wrap.innerHTML='<canvas id="dist-graf-canvas"></canvas>';
+  if(distGraficoAtivo){distGraficoAtivo.destroy();distGraficoAtivo=null;}
+
+  if(d.modo==='Total'){
+    distGraficoAtivo=new Chart(document.getElementById('dist-graf-canvas'),{
+      type:'bar',
+      data:{
+        labels:d.labels,
+        datasets:[{
+          label:'Valor (R$)',
+          data:d.valores,
+          backgroundColor:['rgba(45,106,79,0.85)','rgba(148,163,184,0.85)'],
+          maxBarThickness:90
+        }]
+      },
+      options:{
+        responsive:true,maintainAspectRatio:false,
+        plugins:{
+          legend:{display:false},
+          tooltip:{callbacks:{label:function(i){return 'R$ '+i.parsed.y.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});}}}
+        },
+        scales:{
+          x:{ticks:{font:{size:12}}},
+          y:{beginAtZero:true,ticks:{font:{size:10},callback:function(v){return 'R$ '+v.toLocaleString('pt-BR');}}}
+        }
+      }
+    });
+    return;
+  }
+
+  distGraficoAtivo=new Chart(document.getElementById('dist-graf-canvas'),{
+    type:'bar',
+    data:{
+      labels:d.labels,
+      datasets:[
+        {label:'Verba de MD',data:d.verba,backgroundColor:'rgba(45,106,79,0.85)'},
+        {label:'Recurso Próprio',data:d.proprio,backgroundColor:'rgba(148,163,184,0.85)'}
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{display:true,position:'top',labels:{boxWidth:12,font:{size:11}}},
+        tooltip:{callbacks:{label:function(i){return i.dataset.label+': '+i.parsed.y.toLocaleString('pt-BR')+' un';}}}
+      },
+      scales:{
+        x:{stacked:false,ticks:{font:{size:10},maxRotation:distAgruparPor==='Codigo'?45:0,minRotation:distAgruparPor==='Codigo'?45:0,autoSkip:false}},
+        y:{stacked:false,beginAtZero:true,ticks:{font:{size:10}}}
+      }
+    }
+  });
+}
+
+function trocarAgrupamentoDist(valor){
+  distAgruparPor=valor;
+  atualizarGraficoDist();
+}
+
+function aplicarFiltrosDist(){
+  var b=document.getElementById('fd-busca').value.toLowerCase();
+  var distSel=document.getElementById('fd-distribuidor').value;
+  var catSel=document.getElementById('fd-categoria').value;
+  var itemSel=fdItemSelecionado;
+  var de=document.getElementById('fd-de').value;
+  var ate=document.getElementById('fd-ate').value;
+
+  var brutosFiltrados=distDadosBrutos.filter(function(r){
+    if(distSel && r.Distribuidor!==distSel) return false;
+    if(catSel && r.Categoria!==catSel) return false;
+    if(itemSel && r['Código']!==itemSel) return false;
+    if(de && r.Data<de) return false;
+    if(ate && r.Data>ate) return false;
+    if(b){
+      var alvo=(r.Distribuidor+' '+r['Código']+' '+r['Descrição']).toLowerCase();
+      if(alvo.indexOf(b)<0) return false;
+    }
+    return true;
+  });
+
+  // Reagrega por Distribuidor+Código+Categoria (some as datas dentro do período filtrado)
+  var mapa={};
+  brutosFiltrados.forEach(function(r){
+    var chave=r.IBTEC+'|'+r['Código']+'|'+r.Categoria;
+    if(!mapa[chave]) mapa[chave]={IBTEC:r.IBTEC,Distribuidor:r.Distribuidor,'Código':r['Código'],'Descrição':r['Descrição'],Categoria:r.Categoria,Quantidade:0,Valor:0};
+    mapa[chave].Quantidade+=r.Quantidade;
+    mapa[chave].Valor+=r.Valor;
+  });
+  distDadosFiltrados=Object.keys(mapa).map(function(k){return mapa[k];});
+
+  distPaginaAtual=1;
+  renderTabelaDist();
+  atualizarGraficoDist();
+  atualizarKpisDist();
+}
+
+function limparFiltrosDist(){
+  document.getElementById('fd-busca').value='';
+  document.getElementById('fd-distribuidor').value='';
+  document.getElementById('fd-categoria').value='';
+  fdItemSelecionado='';
+  atualizarLabelItemDist();
+  var dd=document.getElementById('fd-item-dd');
+  if(dd && dd._renderFn) dd._renderFn('');
+  var datas=distDadosBrutos.map(function(r){return r.Data;}).sort();
+  if(datas.length){
+    document.getElementById('fd-de').value=datas[0];
+    document.getElementById('fd-ate').value=datas[datas.length-1];
+  }
+  aplicarFiltrosDist();
+}
+
+function ordenarDist(dados){
+  var nums=['Quantidade','Valor'];
+  return dados.slice().sort(function(a,b){
+    var va=a[distSortCol], vb=b[distSortCol];
+    if(nums.indexOf(distSortCol)>=0){va=n(va);vb=n(vb);}
+    else{va=(va||'').toString().toLowerCase();vb=(vb||'').toString().toLowerCase();}
+    if(va<vb) return distSortDir==='asc'?-1:1;
+    if(va>vb) return distSortDir==='asc'?1:-1;
+    return 0;
+  });
+}
+
+function clicarColDist(col){distSortDir=distSortCol===col?(distSortDir==='asc'?'desc':'asc'):'desc';distSortCol=col;renderTabelaDist();}
+
+function badgeCategoria(cat){
+  if(cat==='Bonificação') return '<span class="badge-urgencia badge-verde">Verba de MD</span>';
+  if(cat==='Venda') return '<span class="badge-urgencia badge-cinza">Recurso Próprio</span>';
+  return '<span class="badge-urgencia badge-amarelo">'+(cat||'—')+'</span>';
+}
+
+function renderTabelaDist(){
+  var ord=ordenarDist(distDadosFiltrados),total=ord.length;
+  var ini=(distPaginaAtual-1)*POR_PAGINA,page=ord.slice(ini,ini+POR_PAGINA);
+  document.getElementById('dist-count').textContent=total+' registros';
+  if(!total){
+    document.getElementById('dist-container').innerHTML='<div class="estado">Nenhum registro encontrado.</div>';
+    document.getElementById('dist-pag-info').textContent='';document.getElementById('dist-pag-btns').innerHTML='';return;
+  }
+  var cols=[
+    {k:'Distribuidor',l:'Distribuidor'},
+    {k:'Código',l:'Código'},
+    {k:'Descrição',l:'Descrição'},
+    {k:'Categoria',l:'Origem'},
+    {k:'Quantidade',l:'Quantidade'},
+    {k:'Valor',l:'Valor (R$)'}
+  ];
+  var thead=cols.map(function(c){
+    var cls=distSortCol===c.k?(distSortDir==='asc'?' class="sort-asc"':' class="sort-desc"'):'';
+    return '<th'+cls+' onclick="clicarColDist(\''+c.k+'\')">'+c.l+'</th>';
+  }).join('');
+  var tbody=page.map(function(r){
+    return '<tr>'
+      +'<td>'+(r.Distribuidor||'—')+'</td>'
+      +'<td class="cod">'+(r['Código']||'—')+'</td>'
+      +'<td style="max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+(r['Descrição']||'')+'">'+(r['Descrição']||'—')+'</td>'
+      +'<td>'+badgeCategoria(r.Categoria)+'</td>'
+      +'<td style="text-align:right">'+Math.round(r.Quantidade).toLocaleString('pt-BR')+'</td>'
+      +'<td style="text-align:right">R$ '+r.Valor.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+'</td>'
+      +'</tr>';
+  }).join('');
+  document.getElementById('dist-container').innerHTML='<table><thead><tr>'+thead+'</tr></thead><tbody>'+tbody+'</tbody></table>';
+  var tp=Math.ceil(total/POR_PAGINA),fim=Math.min(ini+POR_PAGINA,total);
+  document.getElementById('dist-pag-info').textContent='Mostrando '+(ini+1)+'–'+fim+' de '+total+' registros';
+  var btn='<button onclick="irParaDist('+(distPaginaAtual-1)+')" '+(distPaginaAtual===1?'disabled':'')+'>&#8249;</button>';
+  pagRange(distPaginaAtual,tp).forEach(function(p){btn+=p==='...'?'<button disabled>&#8230;</button>':'<button class="'+(p===distPaginaAtual?'ativo':'')+'" onclick="irParaDist('+p+')">'+p+'</button>';});
+  btn+='<button onclick="irParaDist('+(distPaginaAtual+1)+')" '+(distPaginaAtual===tp?'disabled':'')+'>&#8250;</button>';
+  document.getElementById('dist-pag-btns').innerHTML=btn;
+}
+
+function irParaDist(p){var t=Math.ceil(distDadosFiltrados.length/POR_PAGINA);if(p<1||p>t)return;distPaginaAtual=p;renderTabelaDist();window.scrollTo({top:0,behavior:'smooth'});}
+
+function downloadCSVDist(){
+  var ord=ordenarDist(distDadosFiltrados);
+  var cols=['Distribuidor','Código','Descrição','Categoria','Quantidade','Valor'];
+  var linhas=[cols.join(';')];
+  ord.forEach(function(r){
+    linhas.push(cols.map(function(c){
+      var v=r[c];
+      if(c==='Categoria') v=(v==='Bonificação'?'Verba de MD':(v==='Venda'?'Recurso Próprio':v));
+      if(typeof v==='string'&&v.indexOf(';')>=0) v='"'+v+'"';
+      return v!==undefined&&v!==null?v:'';
+    }).join(';'));
+  });
+  var blob=new Blob(['\ufeff'+linhas.join('\n')],{type:'text/csv;charset=utf-8'});
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='vendas_por_distribuidor_'+new Date().toLocaleDateString('pt-BR').replace(/\//g,'-')+'.csv';
+  a.click();
+}
+/* ── FIM ABA VENDAS POR DISTRIBUIDOR ── */
 
 function carregarDados(){
   document.getElementById('update-time').textContent='Atualizando...';
