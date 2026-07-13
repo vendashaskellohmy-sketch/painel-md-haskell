@@ -310,10 +310,10 @@
 
   <div id="aba-distribuidor" class="aba-conteudo">
     <div class="kpis" style="grid-template-columns:repeat(5,1fr)">
-      <div class="kpi" style="border-left-color:var(--verde-escuro)"><div class="kpi-label">Unidades Bonificadas</div><div class="kpi-value" id="kd-und-bonif">—</div><div class="kpi-sub">verba de MD</div></div>
-      <div class="kpi" style="border-left-color:var(--verde-escuro)"><div class="kpi-label">Valor Bonificado</div><div class="kpi-value" style="font-size:16px" id="kd-valor-bonif">—</div><div class="kpi-sub">verba de MD</div></div>
-      <div class="kpi"><div class="kpi-label">Unidades Vendidas</div><div class="kpi-value" id="kd-und-venda">—</div><div class="kpi-sub">recurso próprio</div></div>
-      <div class="kpi"><div class="kpi-label">Valor Vendido</div><div class="kpi-value" style="font-size:16px" id="kd-valor-venda">—</div><div class="kpi-sub">recurso próprio</div></div>
+      <div class="kpi" style="border-left-color:var(--verde-escuro)"><div class="kpi-label">Unidades Bonificadas</div><div class="kpi-value" id="kd-und-bonif">—</div><div class="kpi-sub">bonificação</div></div>
+      <div class="kpi" style="border-left-color:var(--verde-escuro)"><div class="kpi-label">Valor Bonificado</div><div class="kpi-value" style="font-size:16px" id="kd-valor-bonif">—</div><div class="kpi-sub">bonificação</div></div>
+      <div class="kpi"><div class="kpi-label">Unidades Vendidas</div><div class="kpi-value" id="kd-und-venda">—</div><div class="kpi-sub">venda</div></div>
+      <div class="kpi"><div class="kpi-label">Valor Vendido</div><div class="kpi-value" style="font-size:16px" id="kd-valor-venda">—</div><div class="kpi-sub">venda</div></div>
       <div class="kpi"><div class="kpi-label">Valor Total (R$)</div><div class="kpi-value" style="font-size:16px" id="kd-valor">—</div><div class="kpi-sub">bonificado + vendido</div></div>
     </div>
 
@@ -336,8 +336,8 @@
       <label>Origem
         <select id="fd-categoria" onchange="aplicarFiltrosDist()">
           <option value="">Todas</option>
-          <option value="Bonificação">Verba de MD</option>
-          <option value="Venda">Recurso Próprio</option>
+          <option value="Bonificação">Bonificação</option>
+          <option value="Venda">Venda</option>
         </select>
       </label>
       <label>De
@@ -360,7 +360,7 @@
         <label style="font-size:12px;color:var(--cinza-texto);display:flex;align-items:center;gap:6px">
           Agrupar por:
           <select id="dist-graf-agrupar" onchange="trocarAgrupamentoDist(this.value)" style="font-size:12px;padding:4px 8px;border:1px solid var(--cinza-borda);border-radius:6px;background:var(--branco);color:var(--texto)">
-            <option value="Total" selected>Total (Verba MD x Recurso Próprio)</option>
+            <option value="Total" selected>Total (Bonificação x Venda)</option>
             <option value="Distribuidor">Distribuidor</option>
             <option value="Codigo">Item (Código)</option>
           </select>
@@ -949,7 +949,7 @@ function renderCompras(dados){
     var media2026=_d.und>0?(_d.und/_dias2026):0;
     var est=n(r["Estoque Disponível"]),lt=n(r["Leadtime"])||30;
     var cob2026=media2026>0?est/media2026:0;
-    var qtd=Math.max(0,Math.floor((media2026*(90+lt)-est)/10)*10);
+    var qtd=n(r["Sugestão de Compra"]);
     return "<tr>"
       +"<td>"+badgeCobertura(cob2026)+"</td>"
       +"<td class='cod'>"+cod+"</td>"
@@ -957,7 +957,7 @@ function renderCompras(dados){
       +"<td style='text-align:right'>"+Math.round(est).toLocaleString("pt-BR")+"</td>"
       +"<td style='text-align:right'>"+(media2026>0?media2026.toFixed(2):"—")+"</td>"
       +"<td style='text-align:right'>"+Math.round(lt)+"d</td>"
-      +"<td style='text-align:right;font-weight:600;color:var(--verde-escuro)'>"+qtd.toLocaleString("pt-BR")+"</td>"
+      +"<td style='text-align:right;font-weight:600;color:var(--verde-escuro)'>"+Math.round(qtd).toLocaleString("pt-BR")+"</td>"
       +"</tr>";
   }).join("");
   document.getElementById("compras-container").innerHTML="<table><thead>"+thead+"</thead><tbody>"+tbody+"</tbody></table>";
@@ -1272,8 +1272,8 @@ function ordenarDist(dados){
 function clicarColDist(col){distSortDir=distSortCol===col?(distSortDir==='asc'?'desc':'asc'):'desc';distSortCol=col;renderTabelaDist();}
 
 function badgeCategoria(cat){
-  if(cat==='Bonificação') return '<span class="badge-urgencia badge-verde">Verba de MD</span>';
-  if(cat==='Venda') return '<span class="badge-urgencia badge-cinza">Recurso Próprio</span>';
+  if(cat==='Bonificação') return '<span class="badge-urgencia badge-verde">Bonificação</span>';
+  if(cat==='Venda') return '<span class="badge-urgencia badge-cinza">Venda</span>';
   return '<span class="badge-urgencia badge-amarelo">'+(cat||'—')+'</span>';
 }
 
@@ -1325,7 +1325,7 @@ function downloadCSVDist(){
   ord.forEach(function(r){
     linhas.push(cols.map(function(c){
       var v=r[c];
-      if(c==='Categoria') v=(v==='Bonificação'?'Verba de MD':(v==='Venda'?'Recurso Próprio':v));
+      if(c==='Categoria') v=(v==='Bonificação'?'Bonificação':(v==='Venda'?'Venda':v));
       if(typeof v==='string'&&v.indexOf(';')>=0) v='"'+v+'"';
       return v!==undefined&&v!==null?v:'';
     }).join(';'));
