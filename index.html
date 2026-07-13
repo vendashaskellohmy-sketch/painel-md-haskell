@@ -309,11 +309,12 @@
   </div><!-- /aba-compras -->
 
   <div id="aba-distribuidor" class="aba-conteudo">
-    <div class="kpis">
-      <div class="kpi"><div class="kpi-label">Distribuidores Ativos</div><div class="kpi-value" id="kd-distribuidores">—</div><div class="kpi-sub">no período</div></div>
-      <div class="kpi" style="border-left-color:var(--verde-escuro)"><div class="kpi-label">Unidades via Verba de MD</div><div class="kpi-value" id="kd-verba">—</div><div class="kpi-sub">bonificação</div></div>
-      <div class="kpi"><div class="kpi-label">Unidades via Recurso Próprio</div><div class="kpi-value" id="kd-proprio">—</div><div class="kpi-sub">venda</div></div>
-      <div class="kpi"><div class="kpi-label">Valor Total (R$)</div><div class="kpi-value" style="font-size:17px" id="kd-valor">—</div><div class="kpi-sub">valor líquido no período</div></div>
+    <div class="kpis" style="grid-template-columns:repeat(5,1fr)">
+      <div class="kpi" style="border-left-color:var(--verde-escuro)"><div class="kpi-label">Unidades Bonificadas</div><div class="kpi-value" id="kd-und-bonif">—</div><div class="kpi-sub">verba de MD</div></div>
+      <div class="kpi" style="border-left-color:var(--verde-escuro)"><div class="kpi-label">Valor Bonificado</div><div class="kpi-value" style="font-size:16px" id="kd-valor-bonif">—</div><div class="kpi-sub">verba de MD</div></div>
+      <div class="kpi"><div class="kpi-label">Unidades Vendidas</div><div class="kpi-value" id="kd-und-venda">—</div><div class="kpi-sub">recurso próprio</div></div>
+      <div class="kpi"><div class="kpi-label">Valor Vendido</div><div class="kpi-value" style="font-size:16px" id="kd-valor-venda">—</div><div class="kpi-sub">recurso próprio</div></div>
+      <div class="kpi"><div class="kpi-label">Valor Total (R$)</div><div class="kpi-value" style="font-size:16px" id="kd-valor">—</div><div class="kpi-sub">bonificado + vendido</div></div>
     </div>
 
     <div class="filtros-card">
@@ -353,7 +354,7 @@
     <div class="grafico-card">
       <div class="grafico-header">
         <div>
-          <div class="grafico-titulo">Verba de MD vs. Recurso Próprio</div>
+          <div class="grafico-titulo">Bonificação X Vendas</div>
           <div class="grafico-sub" id="dist-graf-sub">Agrupado por distribuidor</div>
         </div>
         <label style="font-size:12px;color:var(--cinza-texto);display:flex;align-items:center;gap:6px">
@@ -706,6 +707,7 @@ function toggleSache(){
   var el = document.getElementById("toggle-sache");
   if(sacheAtivo) el.classList.add("ativo"); else el.classList.remove("ativo");
   aplicarFiltros();
+  if(distCarregado) aplicarFiltrosDist();
 }
 
 function limparFiltros() {
@@ -979,6 +981,7 @@ function carregarDistribuidor(){
       return {
         'Código':cod,
         'Descrição':prod?prod['Descrição']:'—',
+        'Tipo':prod?prod['Tipo']:'',
         IBTEC:l['IBTEC']||'N/D',
         Distribuidor:l['Distribuidor']||'Outros/Não Distribuidor',
         Categoria:l['Categoria']||'Outro',
@@ -1078,18 +1081,16 @@ function popularPeriodoDist(){
 }
 
 function atualizarKpisDist(){
-  var distintos={};
-  var totVerba=0, totProprio=0, totValor=0;
+  var undBonif=0, valBonif=0, undVenda=0, valVenda=0;
   distDadosFiltrados.forEach(function(r){
-    if(r.IBTEC && r.IBTEC!=='N/D') distintos[r.IBTEC]=true;
-    if(r.Categoria==='Bonificação') totVerba+=r.Quantidade;
-    if(r.Categoria==='Venda') totProprio+=r.Quantidade;
-    totValor+=r.Valor;
+    if(r.Categoria==='Bonificação'){ undBonif+=r.Quantidade; valBonif+=r.Valor; }
+    if(r.Categoria==='Venda'){ undVenda+=r.Quantidade; valVenda+=r.Valor; }
   });
-  document.getElementById('kd-distribuidores').textContent=Object.keys(distintos).length;
-  document.getElementById('kd-verba').textContent=Math.round(totVerba).toLocaleString('pt-BR');
-  document.getElementById('kd-proprio').textContent=Math.round(totProprio).toLocaleString('pt-BR');
-  document.getElementById('kd-valor').textContent='R$ '+totValor.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  document.getElementById('kd-und-bonif').textContent=Math.round(undBonif).toLocaleString('pt-BR');
+  document.getElementById('kd-valor-bonif').textContent='R$ '+valBonif.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  document.getElementById('kd-und-venda').textContent=Math.round(undVenda).toLocaleString('pt-BR');
+  document.getElementById('kd-valor-venda').textContent='R$ '+valVenda.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  document.getElementById('kd-valor').textContent='R$ '+(valBonif+valVenda).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 }
 
 function dadosGraficoDist(agruparPor){
@@ -1099,7 +1100,7 @@ function dadosGraficoDist(agruparPor){
       if(r.Categoria==='Bonificação') totVerba+=r.Valor;
       else if(r.Categoria==='Venda') totProprio+=r.Valor;
     });
-    return {modo:'Total', labels:['Verba de MD','Recurso Próprio'], valores:[totVerba,totProprio]};
+    return {modo:'Total', labels:['Bonificação','Vendas'], valores:[totVerba,totProprio]};
   }
   var mapa={};
   var LIMITE=15;
@@ -1179,8 +1180,8 @@ function atualizarGraficoDist(){
     data:{
       labels:d.labels,
       datasets:[
-        {label:'Verba de MD',data:d.verba,backgroundColor:'rgba(45,106,79,0.85)'},
-        {label:'Recurso Próprio',data:d.proprio,backgroundColor:'rgba(148,163,184,0.85)'}
+        {label:'Bonificação',data:d.verba,backgroundColor:'rgba(45,106,79,0.85)'},
+        {label:'Vendas',data:d.proprio,backgroundColor:'rgba(148,163,184,0.85)'}
       ]
     },
     options:{
@@ -1211,6 +1212,7 @@ function aplicarFiltrosDist(){
   var ate=document.getElementById('fd-ate').value;
 
   var brutosFiltrados=distDadosBrutos.filter(function(r){
+    if(!sacheAtivo && (r['Tipo']||'').toLowerCase().indexOf('sach')>=0) return false;
     if(distSel && r.Distribuidor!==distSel) return false;
     if(catSel && r.Categoria!==catSel) return false;
     if(itemSel && r['Código']!==itemSel) return false;
