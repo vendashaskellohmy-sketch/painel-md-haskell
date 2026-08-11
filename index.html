@@ -397,7 +397,7 @@ const CUSTOS = {"1011202": 7.19564, "5013013": 3.17862, "5011015": 3.63908, "101
 const SENHAS_VALIDAS = ['marciana','camacho','priscila','anderson','gustavo','rodrigo','kassya','josimar','dani','jordana', 'dionisio', 'joao', 'jefferson', 'diego'];
 const POR_PAGINA = 50;
 
-let dadosOriginais=[], dadosFiltrados=[], dadosDiarios={};
+let dadosOriginais=[], dadosFiltrados=[], dadosDiarios={}, pedidosCache=null;
 let paginaAtual=1, sortCol='Descri\u00e7\u00e3o', sortDir='asc';
 let linhaSelecionada=null, graficoAtivo=null;
 let distDadosBrutos=[], distDadosFiltrados=[], distPaginaAtual=1, distSortCol='Quantidade', distSortDir='desc', distCarregado=false;
@@ -873,7 +873,7 @@ function trocarAba(id,btn){
   document.getElementById("aba-"+id).classList.add("ativa");
   btn.classList.add("ativa");
   if(id==="pedidos") carregarPedidos();
-  if(id==="compras") renderCompras(dadosOriginais);
+  if(id==="compras") carregarESugerirCompras();
   if(id==="distribuidor" && !distCarregado){ distCarregado=true; carregarDistribuidor(); }
 }
 
@@ -913,8 +913,27 @@ function renderPedidos(dados){
 function carregarPedidos(){
   document.getElementById("pedidos-container").innerHTML='<div class="estado">Carregando...</div>';
   sbFetch("md_pedidos","select=*&limit=1000")
-    .then(function(d){renderPedidos(d);})
+    .then(function(d){pedidosCache=d;renderPedidos(d);})
     .catch(function(err){document.getElementById("pedidos-container").innerHTML='<div class="estado erro">Erro: '+err.message+'</div>';});
+}
+
+function carregarESugerirCompras(){
+  if(pedidosCache){renderCompras(dadosOriginais);return;}
+  document.getElementById("compras-container").innerHTML='<div class="estado">Carregando...</div>';
+  sbFetch("md_pedidos","select=*&limit=1000")
+    .then(function(d){pedidosCache=d;renderCompras(dadosOriginais);})
+    .catch(function(err){pedidosCache=[];renderCompras(dadosOriginais);});
+}
+
+/* Retorna a data (string yyyy-mm-dd) do pedido em aberto mais próximo de chegar para o código, ou null se não houver */
+function previsaoChegadaPorCodigo(codigo){
+  if(!pedidosCache||!pedidosCache.length) return null;
+  var cod=String(codigo||"").replace(/\.0$/,"");
+  var datas=pedidosCache
+    .filter(function(p){return String(p["Código"]||"").replace(/\.0$/,"")===cod && p["Previsão de Chegada"];})
+    .map(function(p){return p["Previsão de Chegada"];})
+    .sort();
+  return datas.length?datas[0]:null;
 }
 
 function badgeCobertura(dias){
@@ -922,6 +941,13 @@ function badgeCobertura(dias){
   if(dias<30) return '<span class="badge-urgencia badge-vermelho">&#9888; '+Math.round(dias)+'d</span>';
   if(dias<60) return '<span class="badge-urgencia badge-amarelo">&#9203; '+Math.round(dias)+'d</span>';
   return '<span class="badge-urgencia badge-verde">&#10003; '+Math.round(dias)+'d</span>';
+}
+/* Categoria de criticidade p/ ordenação: 0=vermelho (mais crítico), 1=amarelo, 2=verde, 3=sem dados */
+function coberturaCategoria(dias){
+  if(!dias||isNaN(dias)) return 3;
+  if(dias<30) return 0;
+  if(dias<60) return 1;
+  return 2;
 }
 
 function renderCompras(dados){
@@ -938,26 +964,37 @@ function renderCompras(dados){
     var _cob2=_med2>0?n(r["Estoque Disponível"])/_med2:0;
     return _med2>0 && _cob2<90 && (r["Linha"]||"").toLowerCase()==="institucional";
   });
-  itens.sort(function(a,b){return n(a["Cobertura"])-n(b["Cobertura"]);});
-  document.getElementById("compras-count").textContent=itens.length+" itens";
-  if(!itens.length){document.getElementById("compras-container").innerHTML='<div class="estado">Nenhum item abaixo da cobertura alvo de 90 dias.</div>';return;}
-  var thead="<tr><th>Cobertura</th><th>Código</th><th>Descrição</th><th style='text-align:right'>Estoque Disp.</th><th style='text-align:right'>Média Diária</th><th style='text-align:right'>Leadtime</th><th style='text-align:right'>Qtd. Sugerida</th></tr>";
   var _dias2026=Math.round((new Date()-new Date(new Date().getFullYear(),0,1))/(1000*60*60*24))||1;
-  var tbody=itens.map(function(r){
+  var linhas=itens.map(function(r){
     var cod=String(r["Código"]||"").replace(/\.0$/,"");
     var _d=diariosLookup(r["Código"]||r["Código"]);
     var media2026=_d.und>0?(_d.und/_dias2026):0;
     var est=n(r["Estoque Disponível"]),lt=n(r["Leadtime"])||30;
     var cob2026=media2026>0?est/media2026:0;
     var qtd=n(r["Sugestão de Compra"]);
+    return {r:r,cod:cod,media2026:media2026,est:est,lt:lt,cob2026:cob2026,qtd:qtd,cat:coberturaCategoria(cob2026)};
+  });
+  linhas.sort(function(a,b){
+    if(a.cat!==b.cat) return a.cat-b.cat;
+    return a.cob2026-b.cob2026;
+  });
+  document.getElementById("compras-count").textContent=linhas.length+" itens";
+  if(!linhas.length){document.getElementById("compras-container").innerHTML='<div class="estado">Nenhum item abaixo da cobertura alvo de 90 dias.</div>';return;}
+  var thead="<tr><th>Cobertura</th><th>Código</th><th>Descrição</th><th style='text-align:right'>Estoque Disp.</th><th style='text-align:right'>Média Diária</th><th style='text-align:right'>Leadtime</th><th style='text-align:right'>Qtd. Sugerida</th><th>Previsão de Chegada</th></tr>";
+  var tbody=linhas.map(function(l){
+    var prevData=previsaoChegadaPorCodigo(l.cod);
+    var prevCel=prevData
+      ?formatarData(prevData)+" "+badgeUrgencia(prevData)
+      :"<span style='color:var(--cinza-texto)'>&#8212; sem pedido</span>";
     return "<tr>"
-      +"<td>"+badgeCobertura(cob2026)+"</td>"
-      +"<td class='cod'>"+cod+"</td>"
-      +"<td>"+(r["Descrição"]||"—")+"</td>"
-      +"<td style='text-align:right'>"+Math.round(est).toLocaleString("pt-BR")+"</td>"
-      +"<td style='text-align:right'>"+(media2026>0?media2026.toFixed(2):"—")+"</td>"
-      +"<td style='text-align:right'>"+Math.round(lt)+"d</td>"
-      +"<td style='text-align:right;font-weight:600;color:var(--verde-escuro)'>"+Math.round(qtd).toLocaleString("pt-BR")+"</td>"
+      +"<td>"+badgeCobertura(l.cob2026)+"</td>"
+      +"<td class='cod'>"+l.cod+"</td>"
+      +"<td>"+(l.r["Descrição"]||"—")+"</td>"
+      +"<td style='text-align:right'>"+Math.round(l.est).toLocaleString("pt-BR")+"</td>"
+      +"<td style='text-align:right'>"+(l.media2026>0?l.media2026.toFixed(2):"—")+"</td>"
+      +"<td style='text-align:right'>"+Math.round(l.lt)+"d</td>"
+      +"<td style='text-align:right;font-weight:600;color:var(--verde-escuro)'>"+Math.round(l.qtd).toLocaleString("pt-BR")+"</td>"
+      +"<td>"+prevCel+"</td>"
       +"</tr>";
   }).join("");
   document.getElementById("compras-container").innerHTML="<table><thead>"+thead+"</thead><tbody>"+tbody+"</tbody></table>";
