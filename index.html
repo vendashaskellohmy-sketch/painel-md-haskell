@@ -81,6 +81,11 @@
   .prod-img { width:40px; height:40px; border-radius:6px; object-fit:cover; display:block; cursor:zoom-in; }
   .img-ph { width:40px; height:40px; border-radius:6px; background:var(--verde-claro); display:flex; align-items:center; justify-content:center; font-size:18px; }
   .cod { font-family:'Courier New',monospace; font-size:12px; color:var(--cinza-texto); }
+  table.tab-dist { table-layout:fixed; font-size:12.5px; }
+  table.tab-dist th { padding:8px 10px; }
+  table.tab-dist td { padding:6px 10px; cursor:default; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  table.tab-dist th.num, table.tab-dist td.num { text-align:right; }
+  table.tab-dist td .badge-urgencia { padding:1px 8px; }
   .paginacao { display:flex; align-items:center; justify-content:space-between; padding:12px 16px; border-top:1px solid var(--cinza-borda); flex-wrap:wrap; gap:8px; }
   .paginacao-info { color:var(--cinza-texto); font-size:12px; }
   .paginacao-btns { display:flex; gap:4px; flex-wrap:wrap; }
@@ -310,11 +315,11 @@
 
   <div id="aba-distribuidor" class="aba-conteudo">
     <div class="kpis" style="grid-template-columns:repeat(5,1fr)">
+      <div class="kpi" style="border-left-color:var(--verde-escuro)"><div class="kpi-label">Valor Total (R$)</div><div class="kpi-value" style="font-size:16px" id="kd-valor">—</div><div class="kpi-sub">bonificado + vendido</div></div>
       <div class="kpi" style="border-left-color:var(--verde-escuro)"><div class="kpi-label">Unidades Bonificadas</div><div class="kpi-value" id="kd-und-bonif">—</div><div class="kpi-sub">bonificação</div></div>
       <div class="kpi" style="border-left-color:var(--verde-escuro)"><div class="kpi-label">Valor Bonificado</div><div class="kpi-value" style="font-size:16px" id="kd-valor-bonif">—</div><div class="kpi-sub">bonificação</div></div>
       <div class="kpi"><div class="kpi-label">Unidades Vendidas</div><div class="kpi-value" id="kd-und-venda">—</div><div class="kpi-sub">venda</div></div>
       <div class="kpi"><div class="kpi-label">Valor Vendido</div><div class="kpi-value" style="font-size:16px" id="kd-valor-venda">—</div><div class="kpi-sub">venda</div></div>
-      <div class="kpi"><div class="kpi-label">Valor Total (R$)</div><div class="kpi-value" style="font-size:16px" id="kd-valor">—</div><div class="kpi-sub">bonificado + vendido</div></div>
     </div>
 
     <div class="filtros-card">
@@ -397,7 +402,7 @@ const CUSTOS = {"1011202": 7.19564, "5013013": 3.17862, "5011015": 3.63908, "101
 const SENHAS_VALIDAS = ['marciana','camacho','priscila','anderson','gustavo','rodrigo','kassya','josimar','dani','jordana', 'dionisio', 'joao', 'jefferson', 'diego'];
 const POR_PAGINA = 50;
 
-let dadosOriginais=[], dadosFiltrados=[], dadosDiarios={}, pedidosCache=null;
+let dadosOriginais=[], dadosFiltrados=[], dadosDiarios={}, pedidosCache=null, diariasRaw=[];
 let paginaAtual=1, sortCol='Descri\u00e7\u00e3o', sortDir='asc';
 let linhaSelecionada=null, graficoAtivo=null;
 let distDadosBrutos=[], distDadosFiltrados=[], distPaginaAtual=1, distSortCol='Quantidade', distSortDir='desc', distCarregado=false;
@@ -589,50 +594,46 @@ function selecionarLinha(tr,codigo,descCod,e){
   document.getElementById('graf-titulo').textContent='Vendas Diárias — '+desc;
   document.getElementById('graf-sub').textContent='Código: '+codigo+' • Carregando...';
   document.getElementById('graf-wrap').innerHTML='<div class="grafico-placeholder">Carregando histórico...</div>';
-  sbFetch('md_vendas_diarias','select=Data,Quantidade&C%C3%B3digo=eq.'+encodeURIComponent(codigo)+'&Data=gte.'+new Date().getFullYear()+'-01-01&order=Data.asc&limit=1000')
-    .then(function(dados){
-      document.getElementById('graf-sub').textContent='Código: '+codigo+' • '+dados.length+' dias com venda';
-      if(!dados||!dados.length){
-        document.getElementById('graf-wrap').innerHTML='<div class="grafico-placeholder">Sem dados de venda para este produto.</div>';
-        return;
-      }
-      renderGrafico(dados);
-      document.getElementById('graf-wrap').scrollIntoView({behavior:'smooth',block:'nearest'});
-    })
-    .catch(function(err){
-      document.getElementById('graf-wrap').innerHTML='<div class="grafico-placeholder estado erro">Erro: '+err.message+'</div>';
-    });
+  var codNorm=String(codigo).replace(/\.0$/,'').trim();
+  var mapaP={};
+  diariasRaw.forEach(function(d){
+    if(String(d['Código']||'').replace(/\.0$/,'').trim()!==codNorm) return;
+    mapaP[d['Data']]=(mapaP[d['Data']]||0)+n(d['Quantidade']);
+  });
+  var dadosP=Object.keys(mapaP).sort().map(function(d){return{Data:d,Quantidade:mapaP[d]};});
+  document.getElementById('graf-sub').textContent='Código: '+codigo+' • '+dadosP.length+' dias com venda';
+  if(!dadosP.length){
+    document.getElementById('graf-wrap').innerHTML='<div class="grafico-placeholder">Sem dados de venda para este produto.</div>';
+    return;
+  }
+  renderGrafico(dadosP);
+  document.getElementById('graf-wrap').scrollIntoView({behavior:'smooth',block:'nearest'});
 }
 
 function atualizarGraficoTotal(){
-  document.getElementById('graf-titulo').textContent='Vendas em 2026';
-  var codigos=dadosFiltrados.map(function(r){return r['Código'];}).filter(Boolean);
+  document.getElementById('graf-titulo').textContent='Vendas em '+new Date().getFullYear();
+  var codigos=dadosFiltrados.map(function(r){return String(r['Código']||'').replace(/\.0$/,'').trim();}).filter(Boolean);
   if(!codigos.length){
     document.getElementById('graf-sub').textContent='Nenhum produto nos filtros atuais';
     document.getElementById('graf-wrap').innerHTML='<div class="grafico-placeholder">Nenhum produto nos filtros atuais.</div>';
     return;
   }
-  document.getElementById('graf-sub').textContent=codigos.length+' produtos • Carregando...';
-  document.getElementById('graf-wrap').innerHTML='<div class="grafico-placeholder">Carregando...</div>';
-  var inicioAno=new Date().getFullYear()+'-01-01';
-  var lote=codigos.slice(0,50);
-  var filtroIn=lote.map(function(c){return encodeURIComponent(c);}).join(',');
-  sbFetch('md_vendas_diarias','select=Data,Quantidade&C%C3%B3digo=in.('+filtroIn+')&Data=gte.'+inicioAno+'&order=Data.asc&limit=10000')
-    .then(function(dados){
-      var mapa={};
-      dados.forEach(function(d){var dt=d['Data'];mapa[dt]=(mapa[dt]||0)+n(d['Quantidade']);});
-      var datas=Object.keys(mapa).sort();
-      var agregado=datas.map(function(d){return{Data:d,Quantidade:mapa[d]};});
-      document.getElementById('graf-sub').textContent=codigos.length+' produtos • '+datas.length+' dias com venda';
-      if(!agregado.length){
-        document.getElementById('graf-wrap').innerHTML='<div class="grafico-placeholder">Sem dados de venda para os produtos filtrados.</div>';
-        return;
-      }
-      renderGrafico(agregado);
-    })
-    .catch(function(err){
-      document.getElementById('graf-wrap').innerHTML='<div class="grafico-placeholder estado erro">Erro: '+err.message+'</div>';
-    });
+  // Usa as diárias já carregadas por completo (com paginação) — sem limite de códigos nem de linhas.
+  var setCodigos={};codigos.forEach(function(c){setCodigos[c]=true;});
+  var mapa={};
+  diariasRaw.forEach(function(d){
+    var c=String(d['Código']||'').replace(/\.0$/,'').trim();
+    if(!setCodigos[c]) return;
+    mapa[d['Data']]=(mapa[d['Data']]||0)+n(d['Quantidade']);
+  });
+  var datas=Object.keys(mapa).sort();
+  var agregado=datas.map(function(d){return{Data:d,Quantidade:mapa[d]};});
+  document.getElementById('graf-sub').textContent=codigos.length+' produtos • '+datas.length+' dias com venda';
+  if(!agregado.length){
+    document.getElementById('graf-wrap').innerHTML='<div class="grafico-placeholder">Sem dados de venda para os produtos filtrados.</div>';
+    return;
+  }
+  renderGrafico(agregado);
 }
 
 function renderGrafico(dados){
@@ -905,7 +906,7 @@ function renderPedidos(dados){
   document.getElementById("pedidos-count").textContent=dados.length+" pedidos";
   if(!dados.length){document.getElementById("pedidos-container").innerHTML='<div class="estado">Nenhum pedido encontrado.</div>';return;}
   var ord=dados.slice().sort(function(a,b){return diasParaChegar(a["Previsão de Chegada"])-diasParaChegar(b["Previsão de Chegada"]);});
-  var thead="<tr><th>Urgência</th><th>Previsão</th><th>Código</th><th>Descrição</th><th style='text-align:right'>Qtd.</th><th style='text-align:right'>Estoque Disp.</th><th>Pedido</th></tr>";
+  var thead="<tr><th>Previsto para chegar em</th><th>Previsão</th><th>Código</th><th>Descrição</th><th style='text-align:right'>Qtd.</th><th style='text-align:right'>Estoque Disp.</th><th>Pedido</th></tr>";
   var tbody=ord.map(function(r){
     var prev=r["Previsão de Chegada"]||"";
     return "<tr>"
@@ -1015,7 +1016,7 @@ function renderCompras(dados){
 function carregarDistribuidor(){
   document.getElementById("dist-container").innerHTML='<div class="estado">Carregando...</div>';
   function fetchPagina(offset,acc){
-    return sbFetch('md_vendas_distribuidor','select=C%C3%B3digo,IBTEC,Distribuidor,Categoria,Data,Quantidade,Valor&order=Data.asc&limit=1000&offset='+offset)
+    return sbFetch('md_vendas_distribuidor','select=C%C3%B3digo,IBTEC,Distribuidor,Categoria,Data,Quantidade,Valor&order=Data.asc,id.asc&limit=1000&offset='+offset)
       .then(function(pagina){
         acc=acc.concat(pagina);
         if(pagina.length===1000) return fetchPagina(offset+1000,acc);
@@ -1334,28 +1335,30 @@ function renderTabelaDist(){
     document.getElementById('dist-pag-info').textContent='';document.getElementById('dist-pag-btns').innerHTML='';return;
   }
   var cols=[
-    {k:'Distribuidor',l:'Distribuidor'},
-    {k:'Código',l:'Código'},
-    {k:'Descrição',l:'Descrição'},
-    {k:'Categoria',l:'Origem'},
-    {k:'Quantidade',l:'Quantidade'},
-    {k:'Valor',l:'Valor (R$)'}
+    {k:'Distribuidor',l:'Distribuidor',w:'25%'},
+    {k:'Código',l:'Código',w:'9%'},
+    {k:'Descrição',l:'Descrição',w:'31%'},
+    {k:'Categoria',l:'Origem',w:'11%'},
+    {k:'Quantidade',l:'Quantidade',w:'10%',num:true},
+    {k:'Valor',l:'Valor (R$)',w:'14%',num:true}
   ];
+  var colgroup='<colgroup>'+cols.map(function(c){return '<col style="width:'+c.w+'">';}).join('')+'</colgroup>';
   var thead=cols.map(function(c){
-    var cls=distSortCol===c.k?(distSortDir==='asc'?' class="sort-asc"':' class="sort-desc"'):'';
-    return '<th'+cls+' onclick="clicarColDist(\''+c.k+'\')">'+c.l+'</th>';
+    var cls=(c.num?'num':'')+(distSortCol===c.k?(distSortDir==='asc'?' sort-asc':' sort-desc'):'');
+    return '<th'+(cls?' class="'+cls.trim()+'"':'')+' onclick="clicarColDist(\''+c.k+'\')">'+c.l+'</th>';
   }).join('');
+  function esc(t){return String(t==null?'':t).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
   var tbody=page.map(function(r){
     return '<tr>'
-      +'<td>'+(r.Distribuidor||'—')+'</td>'
-      +'<td class="cod">'+(r['Código']||'—')+'</td>'
-      +'<td style="max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+(r['Descrição']||'')+'">'+(r['Descrição']||'—')+'</td>'
+      +'<td title="'+esc(r.Distribuidor)+'">'+esc(r.Distribuidor||'—')+'</td>'
+      +'<td class="cod">'+esc(r['Código']||'—')+'</td>'
+      +'<td title="'+esc(r['Descrição'])+'">'+esc(r['Descrição']||'—')+'</td>'
       +'<td>'+badgeCategoria(r.Categoria)+'</td>'
-      +'<td style="text-align:right">'+Math.round(r.Quantidade).toLocaleString('pt-BR')+'</td>'
-      +'<td style="text-align:right">R$ '+r.Valor.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+'</td>'
+      +'<td class="num">'+Math.round(r.Quantidade).toLocaleString('pt-BR')+'</td>'
+      +'<td class="num">R$ '+r.Valor.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+'</td>'
       +'</tr>';
   }).join('');
-  document.getElementById('dist-container').innerHTML='<table><thead><tr>'+thead+'</tr></thead><tbody>'+tbody+'</tbody></table>';
+  document.getElementById('dist-container').innerHTML='<table class="tab-dist">'+colgroup+'<thead><tr>'+thead+'</tr></thead><tbody>'+tbody+'</tbody></table>';
   var tp=Math.ceil(total/POR_PAGINA),fim=Math.min(ini+POR_PAGINA,total);
   document.getElementById('dist-pag-info').textContent='Mostrando '+(ini+1)+'–'+fim+' de '+total+' registros';
   var btn='<button onclick="irParaDist('+(distPaginaAtual-1)+')" '+(distPaginaAtual===1?'disabled':'')+'>&#8249;</button>';
@@ -1396,7 +1399,7 @@ function carregarDados(){
       // Buscar todas as diárias em páginas de 1000
       function fetchPagina(offset, acc) {
         return sbFetch('md_vendas_diarias',
-          'select=C%C3%B3digo,Quantidade,Valor&Data=gte.'+inicioAno+'&limit=1000&offset='+offset)
+          'select=C%C3%B3digo,Data,Quantidade,Valor&Data=gte.'+inicioAno+'&order=id.asc&limit=1000&offset='+offset)
           .then(function(pagina){
             acc = acc.concat(pagina);
             if(pagina.length === 1000) return fetchPagina(offset+1000, acc);
@@ -1407,6 +1410,15 @@ function carregarDados(){
     })()
   ]).then(function(res){
     var dados=res[0],diarias=res[1];
+    diariasRaw=diarias;
+    // Códigos repetidos no md_painel (linha duplicada na lista) contariam estoque e vendas em dobro: mantém só a primeira.
+    var vistos={};
+    dados=dados.filter(function(r){
+      var c=String(r['Código']||'').replace(/\.0$/,'').trim();
+      if(!c) return true;
+      if(vistos[c]) return false;
+      vistos[c]=true; return true;
+    });
     // Indexar vendas diárias por Código
     dadosDiarios={};
     diarias.forEach(function(d){
